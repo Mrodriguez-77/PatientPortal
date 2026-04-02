@@ -1,0 +1,70 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: patient-portal
+
+  datasource:
+    url: jdbc:mysql://localhost:3307/patient_portal_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${DB_USER:root}
+    password: ${DB_PASS:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+  mail:
+    host: sandbox.smtp.mailtrap.io
+    port: 587
+    username: ${MAIL_USER:}
+    password: ${MAIL_PASS:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+    cache: false
+
+  task:
+    scheduling:
+      pool:
+        size: 5
+
+jwt:
+  secret: ${JWT_SECRET:clave-secreta-super-segura-minimo-256-bits-patient-portal-2025}
+  expiration: 86400000
+
+clinical:
+  engine:
+    # url local (sin Grupo A):
+    url: http://localhost:8081
+    # url para defensa (con Grupo A):
+    # url: http://193.168.0.13:8081
+
+espocrm:
+  url: http://localhost:8082
+  api-key: 74bba6190f31aec74ac2ec23df88d7e4
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal - WebSocket Demo</title>
+    <link rel="stylesheet" href="/css/ws-demo.css">
+    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+</head>
+<body>
+<div class="container">
+    <h1>🏥 Patient Portal — WebSocket Demo</h1>
+
+    <div class="card">
+        <label>Patient ID</label>
+        <input type="number" id="patientId" placeholder="Ej: 1" min="1" />
+        <label>Token JWT</label>
+        <input type="text" id="token" placeholder="Pega aquí el token del login" />
+        <button class="btn btn-connect" id="btnConnect" onclick="connect()">Conectar</button>
+        <button class="btn btn-disconnect" id="btnDisconnect" onclick="disconnect()" disabled>Desconectar</button>
+        <span class="status disconnected" id="statusLabel">Desconectado</span>
+    </div>
+
+    <div class="row">
+        <div class="card center">
+            <div class="counter-label">Citas pendientes</div>
+            <div class="counter" id="pendingCount">0</div>
+        </div>
+        <div class="card center">
+            <div class="counter-label">Actualizaciones recibidas</div>
+            <div class="counter" id="totalCount">0</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <label class="section-label">Actualizaciones en tiempo real</label>
+        <ul id="messages">
+            <li class="empty" id="emptyMsg">Sin actualizaciones aún. Conéctate para empezar.</li>
+        </ul>
+    </div>
+</div>
+<script src="/js/ws-demo.js"></script>
+</body>
+</html>
