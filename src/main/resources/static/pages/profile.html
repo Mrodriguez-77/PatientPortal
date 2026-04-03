@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal — Mi Perfil</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/components.css">
+</head>
+<body>
+
+<nav class="portal-navbar">
+    <a class="portal-logo" href="/pages/dashboard.html">+ Patient Portal</a>
+    <div class="nav-links">
+        <a href="/pages/dashboard.html" class="nav-link">Inicio</a>
+        <a href="/pages/appointments.html" class="nav-link">Citas</a>
+        <a href="/pages/notifications.html" class="nav-link">
+            Notificaciones
+            <span id="notifBadge" class="notif-badge d-none">0</span>
+        </a>
+        <div class="dropdown-portal" id="userDropdown">
+            <span class="nav-user" id="navPatientName" onclick="toggleDropdown()">▾</span>
+            <div class="dropdown-menu-portal">
+                <div class="dropdown-header">
+                    <div class="user-name" id="dropdownName"></div>
+                    <div class="user-email" id="dropdownEmail"></div>
+                </div>
+                <a href="/pages/profile.html" class="dropdown-item-portal portal-link-active">Mi perfil</a>
+                <a href="/pages/profile.html#cambiar-password" class="dropdown-item-portal">Cambiar contraseña</a>
+                <div class="dropdown-divider"></div>
+                <button class="dropdown-item-portal danger" onclick="logout()">Cerrar sesión</button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="page-container">
+
+    <div class="page-header">
+        <h5>Mi perfil</h5>
+        <p>Administra tu información personal</p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- DATOS PERSONALES -->
+        <div class="col-md-6">
+            <div class="card portal-card h-100">
+                <div class="card-body p-4">
+                    <div class="section-title">Datos personales</div>
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="avatar-circle" id="avatarInitials"></div>
+                        <div>
+                            <div style="font-size:15px;font-weight:500;" id="profileName"></div>
+                            <div class="text-muted" style="font-size:13px;" id="profileEmail"></div>
+                        </div>
+                    </div>
+                    <table class="table table-borderless mb-0" style="font-size:13px;">
+                        <tr>
+                            <td class="text-muted ps-0" style="width:40%;">Teléfono</td>
+                            <td id="profilePhone">—</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-0">Fecha nac.</td>
+                            <td id="profileBirth">—</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-0">Rol</td>
+                            <td><span class="badge badge-confirmed" id="profileRole"></span></td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted ps-0">Miembro desde</td>
+                            <td id="profileCreated">—</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- CAMBIAR CONTRASEÑA -->
+        <div class="col-md-6" id="cambiar-password">
+            <div class="card portal-card h-100">
+                <div class="card-body p-4">
+                    <div class="section-title">Cambiar contraseña</div>
+                    <div id="pwError" class="alert alert-danger d-none" style="font-size:13px;"></div>
+                    <div id="pwSuccess" class="alert alert-success d-none" style="font-size:13px;"></div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Contraseña actual</label>
+                        <input type="password" id="currentPw" class="form-control custom-input" placeholder="••••••••">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Nueva contraseña</label>
+                        <input type="password" id="newPw" class="form-control custom-input" placeholder="Mínimo 8 caracteres">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small text-muted">Confirmar nueva contraseña</label>
+                        <input type="password" id="confirmPw" class="form-control custom-input" placeholder="Repite la nueva contraseña">
+                    </div>
+                    <button class="btn custom-btn text-white w-100" onclick="handleChangePassword()">
+                        Actualizar contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/auth.js"></script>
+<script src="/js/profile.js"></script>
+</body>
+</html>

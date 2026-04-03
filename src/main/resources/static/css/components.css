@@ -1,0 +1,289 @@
+.portal-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 10px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.portal-navbar .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.portal-navbar .nav-link {
+    font-size: 13px;
+    color: #888;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.portal-navbar .nav-link:hover { color: #6366f1; }
+.portal-navbar .nav-link.active { color: #6366f1; font-weight: 500; }
+
+.portal-navbar .nav-user {
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.portal-navbar .nav-user:hover {
+    background: #f0f0ff;
+    color: #6366f1;
+}
+
+.dropdown-portal {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-portal .dropdown-menu-portal {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: #ffffff;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(99,102,241,0.12);
+    min-width: 180px;
+    z-index: 200;
+    overflow: hidden;
+}
+
+.dropdown-portal.open .dropdown-menu-portal {
+    display: block;
+}
+
+.dropdown-portal .dropdown-header {
+    padding: 12px 16px 8px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-portal .dropdown-header .user-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: #333;
+}
+
+.dropdown-portal .dropdown-header .user-email {
+    font-size: 11px;
+    color: #888;
+}
+
+.dropdown-portal .dropdown-item-portal {
+    display: block;
+    padding: 10px 16px;
+    font-size: 13px;
+    color: #333;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    transition: background 0.15s;
+}
+
+.dropdown-portal .dropdown-item-portal:hover {
+    background: #f8f9ff;
+    color: #6366f1;
+}
+
+.dropdown-portal .dropdown-item-portal.danger {
+    color: #e53935;
+}
+
+.dropdown-portal .dropdown-item-portal.danger:hover {
+    background: #fff5f5;
+    color: #c62828;
+}
+
+.dropdown-portal .dropdown-divider {
+    border: none;
+    border-top: 1px solid #f0f0f0;
+    margin: 4px 0;
+}
+
+.portal-navbar .btn-logout {
+    font-size: 12px;
+    color: #e53935;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.portal-navbar .btn-logout:hover { text-decoration: underline; }
+
+.notif-badge {
+    background: #6366f1;
+    color: white;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 20px;
+    margin-left: 4px;
+}
+
+.page-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px;
+}
+
+.page-header {
+    margin-bottom: 24px;
+}
+
+.page-header h5 {
+    color: #6366f1;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.page-header p {
+    color: #888;
+    font-size: 13px;
+    margin: 0;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #aaa;
+    font-size: 13px;
+}
+
+.btn-outline-portal {
+    border: 1px solid #6366f1;
+    color: #6366f1;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 13px;
+    padding: 6px 16px;
+}
+
+.btn-outline-portal:hover {
+    background: #6366f1;
+    color: white;
+}
+
+.tab-btn {
+    padding: 8px 20px;
+    border: 1px solid #e0e0f0;
+    border-radius: 20px;
+    background: white;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tab-btn.active {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.filter-btn {
+    padding: 6px 14px;
+    border: 1px solid #e0e0f0;
+    border-radius: 20px;
+    background: white;
+    font-size: 12px;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-btn.active {
+    background: #eef2ff;
+    color: #6366f1;
+    border-color: #6366f1;
+}
+
+.doctor-card {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    padding: 16px;
+    transition: box-shadow 0.2s;
+}
+
+.doctor-card:hover {
+    box-shadow: 0 4px 16px rgba(99,102,241,0.1);
+}
+
+.doctor-specialty {
+    display: inline-block;
+    background: #eef2ff;
+    color: #6366f1;
+    font-size: 11px;
+    padding: 2px 10px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+}
+
+.doctor-fee {
+    font-size: 13px;
+    color: #888;
+}
+
+.appointment-row {
+    background: white;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+}
+
+.modal-overlay.d-none { display: none !important; }
+
+.modal-card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 16px;
+}
+
+.page-btn {
+    padding: 6px 14px;
+    border: 1px solid #e0e0f0;
+    border-radius: 8px;
+    background: white;
+    font-size: 13px;
+    color: #888;
+    cursor: pointer;
+}
+
+.page-btn.active {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
