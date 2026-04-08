@@ -10,6 +10,9 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Optional;
+import org.springframework.web.util.UriComponentsBuilder;
+
 
 @Service
 @Slf4j
@@ -25,25 +28,36 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
     @Override
     public Object getDoctors(String specialty, Pageable pageable) {
         try {
-            String uri = "/api/doctors?page=" + pageable.getPageNumber()
-                    + "&size=" + pageable.getPageSize();
-            if (specialty != null && !specialty.isEmpty()) {
-                uri += "&specialty=" + specialty;
-            }
+            String uri = UriComponentsBuilder.fromPath("/api/doctors")
+                    .queryParam("page", pageable.getPageNumber())
+                    .queryParam("size", pageable.getPageSize())
+                    .queryParamIfPresent("specialty", Optional.ofNullable(specialty).filter(s -> !s.isBlank()))
+                    .build(true)
+                    .toUriString();
 
-            return clinicalEngineClient.get()
+            log.info("Proxy Grupo A -> GET {}", uri);
+
+            Object response = clinicalEngineClient.get()
                     .uri(uri)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
+
+            if (response instanceof java.util.Map<?, ?> map && map.containsKey("data")) {
+                return map.get("data");
+            }
+            return response;
+
         } catch (WebClientResponseException e) {
-            log.error("Error al obtener médicos de Grupo A: {}", e.getMessage());
+            log.error("Proxy Grupo A <- HTTP error uri=/api/doctors status={} body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
             return Collections.emptyList();
         } catch (Exception e) {
-            log.error("Grupo A no disponible: {}", e.getMessage());
+            log.error("Proxy Grupo A <- fallo técnico uri=/api/doctors msg={}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
+
 
     @Override
     public Object getPatientAppointments(Long patientId, String status, Pageable pageable) {

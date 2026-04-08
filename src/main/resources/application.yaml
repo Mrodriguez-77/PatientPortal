@@ -55,9 +55,9 @@ jwt:
 clinical:
   engine:
     # url local (sin Grupo A):
-    url: http://localhost:8081
+    #url: http://localhost:8081
     # url para defensa (con Grupo A):
-    # url: http://193.168.0.13:8081
+    url: https://alivia-unstructured-dragonfly.ngrok-free.dev/
 
 espocrm:
   url: http://localhost:8082
