@@ -62,17 +62,29 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
     @Override
     public Object getPatientAppointments(Long patientId, String status, Pageable pageable) {
         try {
-            String uri = "/api/appointments?doctorId=0&page="
-                    + pageable.getPageNumber()
+            String uri = "/api/appointments/patient/" + patientId
+                    + "?page=" + pageable.getPageNumber()
                     + "&size=" + pageable.getPageSize();
 
-            return clinicalEngineClient.get()
+            log.info("Proxy -> GET {} (patientId={})", uri, patientId);
+
+            Object response = clinicalEngineClient.get()
                     .uri(uri)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
+
+            if (response instanceof java.util.Map<?, ?> map && map.containsKey("data")) {
+                return map.get("data");
+            }
+            return response;
+
+        } catch (WebClientResponseException e) {
+            log.error("Error HTTP citas: status={}, body={}",
+                    e.getStatusCode(), e.getResponseBodyAsString());
+            return Collections.emptyList();
         } catch (Exception e) {
-            log.error("Error al obtener citas: {}", e.getMessage());
+            log.error("Grupo A no disponible para citas: {}", e.getMessage());
             return Collections.emptyList();
         }
     }

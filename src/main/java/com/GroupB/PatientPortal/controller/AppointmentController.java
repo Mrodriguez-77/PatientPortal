@@ -1,16 +1,17 @@
 package com.GroupB.PatientPortal.controller;
 
 import com.GroupB.PatientPortal.dto.ApiResponse;
+import com.GroupB.PatientPortal.security.JwtUtil;
 import com.GroupB.PatientPortal.service.AppointmentProxyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
 import java.time.LocalDateTime;
 
 @RestController
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 public class AppointmentController {
 
     private final AppointmentProxyService appointmentProxyService;
+    private final JwtUtil jwtUtil;
 
     @GetMapping("/api/doctors/available")
     @Operation(summary = "Ver médicos disponibles (proxy a Grupo A)")
@@ -34,11 +36,10 @@ public class AppointmentController {
     @GetMapping("/api/patient/appointments")
     @Operation(summary = "Ver historial de citas del paciente")
     public ResponseEntity<ApiResponse<Object>> getMyAppointments(
-            Principal principal,
+            HttpServletRequest request,
             @RequestParam(required = false) String status,
             Pageable pageable) {
-        String[] parts = principal.getName().split(":");
-        Long patientId = Long.parseLong(parts[0]);
+        Long patientId = extractPatientId(request);
         return ResponseEntity.ok(
                 ApiResponse.success("Citas obtenidas",
                         appointmentProxyService.getPatientAppointments(
@@ -48,12 +49,11 @@ public class AppointmentController {
     @PostMapping("/api/patient/appointments")
     @Operation(summary = "Solicitar nueva cita (proxy a Grupo A)")
     public ResponseEntity<ApiResponse<Object>> createAppointment(
-            Principal principal,
+            HttpServletRequest request,
             @RequestParam Long doctorId,
             @RequestParam LocalDateTime dateTime) {
-        Long patientId = extractPatientId(principal.getName());
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
+        Long patientId = extractPatientId(request);
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Cita creada exitosamente",
                         appointmentProxyService.createAppointment(
                                 patientId, doctorId, dateTime)));
@@ -68,11 +68,15 @@ public class AppointmentController {
                         appointmentProxyService.cancelAppointment(id)));
     }
 
-    private Long extractPatientId(String principalName) {
+    private Long extractPatientId(HttpServletRequest request) {
         try {
-            return Long.parseLong(principalName);
-        } catch (NumberFormatException e) {
-            return 0L;
+            String authHeader = request.getHeader("Authorization");
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                return jwtUtil.extractPatientId(authHeader.substring(7));
+            }
+        } catch (Exception e) {
+            // log error
         }
+        return 0L;
     }
 }

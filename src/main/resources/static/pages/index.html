@@ -21,15 +21,19 @@
                 <h5 class="card-title mb-1">Bienvenido</h5>
                 <p class="text-muted mb-4" style="font-size:13px;">Ingresa a tu cuenta</p>
                 <div id="loginError" class="alert alert-danger d-none" style="font-size:13px;"></div>
-                <div class="mb-3">
-                    <label class="form-label small text-muted">Correo electrónico</label>
-                    <input type="email" id="loginEmail" class="form-control custom-input" placeholder="ana@test.com">
-                </div>
-                <div class="mb-4">
-                    <label class="form-label small text-muted">Contraseña</label>
-                    <input type="password" id="loginPassword" class="form-control custom-input" placeholder="••••••••">
-                </div>
-                <button class="btn custom-btn text-white w-100 mb-3" onclick="handleLogin()">Ingresar</button>
+
+                <form onsubmit="event.preventDefault(); handleLogin();">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Correo electrónico</label>
+                        <input type="email" id="loginEmail" class="form-control custom-input" placeholder="user@test.com">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small text-muted">Contraseña</label>
+                        <input type="password" id="loginPassword" class="form-control custom-input" placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn custom-btn text-white w-100 mb-3">Ingresar</button>
+                </form>
+
                 <p class="text-center text-muted mb-0" style="font-size:13px;">
                     ¿No tienes cuenta?
                     <a href="#" class="portal-link" onclick="showRegister()">Regístrate aquí</a>

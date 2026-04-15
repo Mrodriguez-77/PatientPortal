@@ -22,7 +22,6 @@ public class EspoCrmServiceImpl implements EspoCrmService {
     }
 
     @Override
-    @Async
     public void syncContact(Patient patient) {
         try {
             String[] nameParts = patient.getFullName().split(" ", 2);

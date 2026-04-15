@@ -116,6 +116,11 @@ async function confirmAppointment() {
             document.getElementById('modalSuccess').textContent = 'Cita agendada exitosamente';
             document.getElementById('modalSuccess').classList.remove('d-none');
             document.getElementById('modalError').classList.add('d-none');
+
+            // Muestra el historial actualizado al confirmar una nueva cita.
+            showTab('history');
+            loadAppointments(0);
+
             setTimeout(() => closeModal(), 2000);
         } else {
             showError('modalError', data.message || 'Error al agendar cita');

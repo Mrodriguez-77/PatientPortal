@@ -57,7 +57,7 @@ clinical:
     # url local (sin Grupo A):
     #url: http://localhost:8081
     # url para defensa (con Grupo A):
-    url: https://alivia-unstructured-dragonfly.ngrok-free.dev/
+    url: http://10.0.0.129:8081
 
 espocrm:
   url: http://localhost:8082
