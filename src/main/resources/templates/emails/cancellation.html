@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cita Cancelada</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f0ff; padding: 24px; }
+        .wrapper { max-width: 580px; margin: 0 auto; }
+        .header { background: #6366f1; border-radius: 12px 12px 0 0; padding: 28px 32px; text-align: center; }
+        .header .logo { color: white; font-size: 22px; font-weight: 600; }
+        .header .subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 4px; }
+        .body { background: white; padding: 36px 32px; }
+        .icon { font-size: 48px; text-align: center; margin-bottom: 16px; }
+        .greeting { font-size: 18px; font-weight: 600; color: #1e1e2e; margin-bottom: 8px; }
+        .message { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 24px; }
+        .detail-card { background: #fff5f5; border-left: 4px solid #e53935; border-radius: 0 8px 8px 0; padding: 16px 20px; margin-bottom: 24px; }
+        .detail-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #ffebee; font-size: 13px; }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-label { color: #888; }
+        .detail-value { color: #333; font-weight: 500; }
+        .btn { display: inline-block; background: #6366f1; color: white !important; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 500; }
+        .badge-danger { display: inline-block; background: #fff0f0; color: #c62828; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
+        .reason-box { background: #fff8f0; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #555; margin-bottom: 20px; }
+        .footer { background: #f8f9ff; border-radius: 0 0 12px 12px; padding: 20px 32px; text-align: center; }
+        .footer p { font-size: 12px; color: #aaa; line-height: 1.6; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="header">
+        <div class="logo">+ Patient Portal</div>
+        <div class="subtitle">Sistema de Clínica Médica</div>
+    </div>
+    <div class="body">
+        <div class="icon">❌</div>
+        <span class="badge-danger">Cita Cancelada</span>
+        <div class="greeting" th:text="'Hola, ' + ${patientName} + '!'">Hola!</div>
+        <p class="message">
+            Te informamos que tu cita médica ha sido cancelada.
+            Puedes agendar una nueva cita cuando lo necesites.
+        </p>
+        <div class="detail-card">
+            <div class="detail-row">
+                <span class="detail-label">Médico</span>
+                <span class="detail-value" th:text="${doctorName}">Dr. —</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Especialidad</span>
+                <span class="detail-value" th:text="${specialty}">—</span>
+            </div>
+            <div class="detail-row">
+                <span class="detail-label">Fecha original</span>
+                <span class="detail-value" th:text="${dateTime}">—</span>
+            </div>
+        </div>
+        <div class="reason-box"
+             th:if="${cancellationReason != null and cancellationReason != 'No especificada'}">
+            <strong>Motivo:</strong>
+            <span th:text="${cancellationReason}">—</span>
+        </div>
+        <p style="font-size:13px;color:#888;margin-bottom:20px;">
+            Si tienes dudas sobre esta cancelación, contáctanos.
+        </p>
+        <a href="http://localhost:8083/pages/appointments.html" class="btn">
+            Agendar nueva cita
+        </a>
+    </div>
+    <div class="footer">
+        <p>Este es un correo automático, por favor no responder directamente.</p>
+        <p style="margin-top:10px;color:#ccc;">© 2026 Patient Portal · Clínica Médica</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.GroupB.PatientPortal.entity;
 
 import com.GroupB.PatientPortal.enums.NotificationType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -19,6 +20,7 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
+    @JsonIgnoreProperties({"notifications", "password"})
     private Patient patient;
 
     @Column(nullable = false)
@@ -31,7 +33,7 @@ public class Notification {
     @Column(name = "appointment_id")
     private Long appointmentId;
 
-    @Column(nullable = false)
+    @Column(name = "is_read", nullable = false)
     private boolean read;
 
     @Column(name = "created_at")

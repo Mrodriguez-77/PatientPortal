@@ -23,14 +23,22 @@ spring:
   rabbitmq:
     host: localhost
     port: 5672
-    username: guest
-    password: guest
+    username: admin
+    password: admin
+    listener:
+      simple:
+        acknowledge-mode: auto
+        retry:
+          enabled: true
+          initial-interval: 1000ms
+          max-attempts: 3
+          max-interval: 10000ms
 
   mail:
     host: sandbox.smtp.mailtrap.io
     port: 587
-    username: ${MAIL_USER:}
-    password: ${MAIL_PASS:}
+    username: 4fb0a0f8381411
+    password: 6bbed8100f7313
     properties:
       mail:
         smtp:
@@ -61,7 +69,7 @@ clinical:
 
 espocrm:
   url: http://localhost:8082
-  api-key: 74bba6190f31aec74ac2ec23df88d7e4
+  api-key: 73b75998dbc553923582872bf0f15431
 
 springdoc:
   api-docs:

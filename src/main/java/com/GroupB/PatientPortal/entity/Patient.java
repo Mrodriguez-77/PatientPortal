@@ -1,6 +1,7 @@
 package com.GroupB.PatientPortal.entity;
 
 import com.GroupB.PatientPortal.enums.Role;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -47,6 +48,7 @@ public class Patient {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("patient")
     private List<Notification> notifications;
 
     @PrePersist

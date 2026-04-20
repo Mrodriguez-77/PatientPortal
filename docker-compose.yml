@@ -1,10 +1,10 @@
-version: '3.8'
+version: "3.8"
 
 services:
-
   mysql-patient:
     image: mysql:8.0
     container_name: mysql-patient
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: patient_portal_db
@@ -12,11 +12,54 @@ services:
       - "3307:3306"
     volumes:
       - mysql-patient-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: some-rabbit
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  espocrm-mysql:
+    image: mysql:8.0
+    container_name: espocrm-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: espocrm
+      MYSQL_USER: espocrm
+      MYSQL_PASSWORD: espocrm
+    ports:
+      - "3308:3306"
+    volumes:
+      - espocrm-mysql-data:/var/lib/mysql
+
+  espocrm:
+    image: espocrm/espocrm
+    container_name: espocrm
+    restart: unless-stopped
+    depends_on:
+      - espocrm-mysql
+    ports:
+      - "8082:80"
+    environment:
+      ESPOCRM_DATABASE_HOST: espocrm-mysql
+      ESPOCRM_DATABASE_PORT: 3306
+      ESPOCRM_DATABASE_NAME: espocrm
+      ESPOCRM_DATABASE_USER: espocrm
+      ESPOCRM_DATABASE_PASSWORD: espocrm
+      ESPOCRM_SITE_URL: http://localhost:8082
+    volumes:
+      - espocrm-data:/var/www/html
 
 volumes:
   mysql-patient-data:
+  rabbitmq-data:
+  espocrm-mysql-data:
+  espocrm-data:
