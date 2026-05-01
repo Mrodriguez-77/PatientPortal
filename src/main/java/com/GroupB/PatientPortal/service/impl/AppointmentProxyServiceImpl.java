@@ -3,6 +3,8 @@ package com.GroupB.PatientPortal.service.impl;
 import com.GroupB.PatientPortal.service.AppointmentProxyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -26,6 +28,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
     }
 
     @Override
+    @Cacheable(value = "doctors", key = "#specialty + '_' + #pageable.pageNumber")
     public Object getDoctors(String specialty, Pageable pageable) {
         try {
             String uri = UriComponentsBuilder.fromPath("/api/doctors")
@@ -90,6 +93,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
     }
 
     @Override
+    @CacheEvict(value = "doctors", allEntries = true)
     public Object createAppointment(Long patientId, Long doctorId, LocalDateTime dateTime) {
         try {
             String formattedDate = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);

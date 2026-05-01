@@ -11,36 +11,92 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
+    // ── Exchange principal ──────────────────────────────────────
     public static final String EXCHANGE = "appointments.exchange";
 
-    public static final String QUEUE_CONFIRMED = "patient.appointments.confirmed";
-    public static final String QUEUE_CANCELLED = "patient.appointments.cancelled";
-    public static final String QUEUE_STATUS_CHANGED = "patient.appointments.status.changed";
-
+    // ── Routing keys ────────────────────────────────────────────
     public static final String ROUTING_CONFIRMED = "appointment.confirmed";
     public static final String ROUTING_CANCELLED = "appointment.cancelled";
     public static final String ROUTING_STATUS_CHANGED = "appointment.status.changed";
 
+    // ── Queues principales ──────────────────────────────────────
+    public static final String QUEUE_CONFIRMED = "patient.appointments.confirmed";
+    public static final String QUEUE_CANCELLED = "patient.appointments.cancelled";
+    public static final String QUEUE_STATUS_CHANGED = "patient.appointments.status.changed";
+
+    // ── Dead Letter Queue ───────────────────────────────────────
+    public static final String DLQ_EXCHANGE = "appointments.dlx";
+    public static final String DLQ_CONFIRMED = "patient.appointments.confirmed.dlq";
+    public static final String DLQ_CANCELLED = "patient.appointments.cancelled.dlq";
+    public static final String DLQ_STATUS_CHANGED = "patient.appointments.status.changed.dlq";
+
+    // ── Serialización JSON ──────────────────────────────────────
+    @Bean
+    public MessageConverter jsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+        RabbitTemplate template = new RabbitTemplate(connectionFactory);
+        template.setMessageConverter(jsonMessageConverter());
+        return template;
+    }
+
+    // ── Exchange principal ──────────────────────────────────────
     @Bean
     public DirectExchange appointmentsExchange() {
         return new DirectExchange(EXCHANGE, true, false);
     }
 
+    // ── Dead Letter Exchange ────────────────────────────────────
+    @Bean
+    public DirectExchange deadLetterExchange() {
+        return new DirectExchange(DLQ_EXCHANGE, true, false);
+    }
+
+    // ── Queues principales con DLQ configurada ──────────────────
     @Bean
     public Queue confirmedQueue() {
-        return new Queue(QUEUE_CONFIRMED, true);
+        return QueueBuilder.durable(QUEUE_CONFIRMED)
+                .withArgument("x-dead-letter-exchange", DLQ_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", DLQ_CONFIRMED)
+                .build();
     }
 
     @Bean
     public Queue cancelledQueue() {
-        return new Queue(QUEUE_CANCELLED, true);
+        return QueueBuilder.durable(QUEUE_CANCELLED)
+                .withArgument("x-dead-letter-exchange", DLQ_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", DLQ_CANCELLED)
+                .build();
     }
 
     @Bean
     public Queue statusChangedQueue() {
-        return new Queue(QUEUE_STATUS_CHANGED, true);
+        return QueueBuilder.durable(QUEUE_STATUS_CHANGED)
+                .withArgument("x-dead-letter-exchange", DLQ_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", DLQ_STATUS_CHANGED)
+                .build();
     }
 
+    // ── Dead Letter Queues ──────────────────────────────────────
+    @Bean
+    public Queue dlqConfirmed() {
+        return new Queue(DLQ_CONFIRMED, true);
+    }
+
+    @Bean
+    public Queue dlqCancelled() {
+        return new Queue(DLQ_CANCELLED, true);
+    }
+
+    @Bean
+    public Queue dlqStatusChanged() {
+        return new Queue(DLQ_STATUS_CHANGED, true);
+    }
+
+    // ── Bindings principales ────────────────────────────────────
     @Bean
     public Binding confirmedBinding() {
         return BindingBuilder.bind(confirmedQueue())
@@ -62,15 +118,25 @@ public class RabbitMQConfig {
                 .with(ROUTING_STATUS_CHANGED);
     }
 
+    // ── Bindings DLQ ────────────────────────────────────────────
     @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    public Binding dlqConfirmedBinding() {
+        return BindingBuilder.bind(dlqConfirmed())
+                .to(deadLetterExchange())
+                .with(DLQ_CONFIRMED);
     }
 
     @Bean
-    public RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
-        RabbitTemplate template = new RabbitTemplate(connectionFactory);
-        template.setMessageConverter(jsonMessageConverter());
-        return template;
+    public Binding dlqCancelledBinding() {
+        return BindingBuilder.bind(dlqCancelled())
+                .to(deadLetterExchange())
+                .with(DLQ_CANCELLED);
+    }
+
+    @Bean
+    public Binding dlqStatusChangedBinding() {
+        return BindingBuilder.bind(dlqStatusChanged())
+                .to(deadLetterExchange())
+                .with(DLQ_STATUS_CHANGED);
     }
 }

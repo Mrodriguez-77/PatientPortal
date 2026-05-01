@@ -58,8 +58,18 @@ services:
     volumes:
       - espocrm-data:/var/www/html
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis-patient
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/var/lib/redis
+
 volumes:
   mysql-patient-data:
   rabbitmq-data:
   espocrm-mysql-data:
   espocrm-data:
+  redis-data:
+

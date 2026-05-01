@@ -8,18 +8,20 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/components.css">
     <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.0.0/bundles/stomp.umd.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
 
 <nav class="portal-navbar">
     <a class="portal-logo" href="/pages/dashboard.html">+ Patient Portal</a>
     <div class="nav-links">
-        <a href="/pages/dashboard.html" class="nav-link active">Inicio</a>
+        <a href="/pages/dashboard.html" class="nav-link">Inicio</a>
         <a href="/pages/appointments.html" class="nav-link">Citas</a>
         <a href="/pages/notifications.html" class="nav-link">
             Notificaciones
             <span id="notifBadge" class="notif-badge d-none">0</span>
         </a>
+        <a href="/pages/ws-demo.html" class="nav-link">Tiempo Real</a>
         <div class="dropdown-portal" id="userDropdown">
             <span class="nav-user" id="navPatientName" onclick="toggleDropdown()">▾</span>
             <div class="dropdown-menu-portal">

@@ -1,45 +1,47 @@
 let stompClient = null;
-let pendingCount = 0;
-let totalCount = 0;
+let countUpdates = 0;
+let countPending = 0;
 
-function connect() {
-    const patientId = document.getElementById('patientId').value;
-    const token = document.getElementById('token').value;
+document.addEventListener('DOMContentLoaded', () => {
+    requireAuth();
+    setNavbar();
+    connectWS();
+});
 
-    if (!patientId || !token) {
-        alert('Por favor ingresa el Patient ID y el Token JWT');
-        return;
-    }
+function connectWS() {
+    const patientId = getPatientId();
+    const token = getToken();
+    if (!patientId || !token) return;
 
-    if (parseInt(patientId) <= 0) {
-        alert('El Patient ID debe ser un número positivo');
-        return;
-    }
+    addLog('Conectando a WebSocket...');
 
     stompClient = new StompJs.Client({
         brokerURL: 'ws://localhost:8083/ws/websocket',
-        connectHeaders: {
-            Authorization: 'Bearer ' + token
-        },
+        connectHeaders: { Authorization: 'Bearer ' + token },
         reconnectDelay: 5000,
         onConnect: () => {
             setStatus(true);
+            addLog('✅ Conectado exitosamente');
             stompClient.subscribe(
                 '/topic/patient/' + patientId + '/appointments',
                 (message) => onMessage(JSON.parse(message.body))
             );
+            addLog('📡 Suscrito a /topic/patient/' + patientId + '/appointments');
         },
-        onDisconnect: () => setStatus(false),
-        onStompError: (frame) => {
-            console.error('Error STOMP:', frame);
+        onDisconnect: () => {
             setStatus(false);
+            addLog('❌ Desconectado');
+        },
+        onStompError: (frame) => {
+            setStatus(false);
+            addLog('⚠️ Error: ' + frame.headers?.message);
         }
     });
 
     stompClient.activate();
 }
 
-function disconnect() {
+function disconnectWS() {
     if (stompClient) {
         stompClient.deactivate();
         stompClient = null;
@@ -48,39 +50,81 @@ function disconnect() {
 }
 
 function onMessage(data) {
-    document.getElementById('emptyMsg')?.remove();
+    addLog('📨 Mensaje recibido: ' + JSON.stringify(data));
 
-    totalCount++;
-    document.getElementById('totalCount').textContent = totalCount;
+    countUpdates++;
+    document.getElementById('countUpdates').textContent = countUpdates;
 
     if (data.newStatus === 'SCHEDULED' || data.newStatus === 'CONFIRMED') {
-        pendingCount++;
+        countPending++;
     } else if (data.newStatus === 'CANCELLED' || data.newStatus === 'COMPLETED') {
-        pendingCount = Math.max(0, pendingCount - 1);
+        countPending = Math.max(0, countPending - 1);
     }
-    document.getElementById('pendingCount').textContent = pendingCount;
+    document.getElementById('countPending').textContent = countPending;
 
-    const li = document.createElement('li');
+    const el = document.getElementById('messagesList');
+    const empty = el.querySelector('.empty-state');
+    if (empty) empty.remove();
 
-    if (data.newStatus === 'CANCELLED') {
-        li.className = 'cancelled';
-    } else if (data.newStatus === 'CONFIRMED') {
-        li.className = 'confirmed';
-    }
+    const statusMap = {
+        CONFIRMED:   { label: 'Confirmada',  cls: 'badge-confirmed' },
+        CANCELLED:   { label: 'Cancelada',   cls: 'badge-cancelled' },
+        COMPLETED:   { label: 'Completada',  cls: 'badge-completed' },
+        SCHEDULED:   { label: 'Agendada',    cls: 'badge-scheduled' },
+        IN_PROGRESS: { label: 'En progreso', cls: 'badge-in-progress' }
+    };
+    const s = statusMap[data.newStatus] || { label: data.newStatus, cls: '' };
+    const time = new Date().toLocaleTimeString('es-ES');
 
-    const time = new Date().toLocaleTimeString();
-    li.innerHTML = `<strong>${time}</strong> — Cita #${data.appointmentId} 
-                    con Dr. ${data.doctorName}: 
-                    <strong>${data.newStatus}</strong>`;
+    const item = document.createElement('div');
+    item.className = 'notif-item' +
+        (data.newStatus === 'CANCELLED' ? ' cancelled' : '');
+    item.innerHTML = `
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <div style="font-weight:500;font-size:13px;">
+                    Cita #${data.appointmentId}
+                    con ${data.doctorName || '—'}
+                </div>
+                <div style="font-size:12px;color:#888;margin-top:2px;">
+                    Estado actualizado a
+                    <span class="badge ${s.cls}"
+                          style="font-size:11px;">${s.label}</span>
+                </div>
+            </div>
+            <span style="font-size:11px;color:#aaa;white-space:nowrap;
+                         margin-left:12px;">${time}</span>
+        </div>
+    `;
 
-    const list = document.getElementById('messages');
-    list.insertBefore(li, list.firstChild);
+    el.insertBefore(item, el.firstChild);
 }
 
 function setStatus(connected) {
+    const dot = document.getElementById('statusDot');
     const label = document.getElementById('statusLabel');
+    const btnConnect = document.getElementById('btnConnect');
+    const btnDisconnect = document.getElementById('btnDisconnect');
+
+    dot.style.background = connected ? '#2e7d32' : '#e53935';
     label.textContent = connected ? 'Conectado' : 'Desconectado';
-    label.className = 'status ' + (connected ? 'connected' : 'disconnected');
-    document.getElementById('btnConnect').disabled = connected;
-    document.getElementById('btnDisconnect').disabled = !connected;
+    label.style.color = connected ? '#2e7d32' : '#e53935';
+    btnConnect.disabled = connected;
+    btnDisconnect.disabled = !connected;
+}
+
+function addLog(message) {
+    const log = document.getElementById('wsLog');
+    const time = new Date().toLocaleTimeString('es-ES');
+    log.innerHTML = `[${time}] ${message}\n` + log.innerHTML;
+}
+
+function clearLog() {
+    document.getElementById('messagesList').innerHTML =
+        '<div class="empty-state">Sin actualizaciones aún.</div>';
+    document.getElementById('wsLog').innerHTML = 'Log limpiado.';
+    countUpdates = 0;
+    countPending = 0;
+    document.getElementById('countUpdates').textContent = '0';
+    document.getElementById('countPending').textContent = '0';
 }

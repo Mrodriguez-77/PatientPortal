@@ -56,6 +56,13 @@ spring:
       pool:
         size: 5
 
+  cache:
+    type: redis
+    data:
+      redis:
+        host: ${REDIS_HOST:localhost}
+        port: 6379
+
 jwt:
   secret: ${JWT_SECRET:clave-secreta-super-segura-minimo-256-bits-patient-portal-2025}
   expiration: 86400000
@@ -65,7 +72,7 @@ clinical:
     # url local (sin Grupo A):
     #url: http://localhost:8081
     # url para defensa (con Grupo A):
-    url: http://10.0.0.129:8081
+    url: https://leigha-attestative-astrally.ngrok-free.dev/
 
 espocrm:
   url: http://localhost:8082
@@ -76,3 +83,4 @@ springdoc:
     path: /api-docs
   swagger-ui:
     path: /swagger-ui.html
+
