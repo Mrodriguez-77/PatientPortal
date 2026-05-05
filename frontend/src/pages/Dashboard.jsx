@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { api, normalizeList } from "../services/api.js";
+import { useNavigate } from "react-router-dom";
+import { api, normalizeList, normalizeDoctor, normalizeAppointment } from "../services/api.js";
 import { useAuth } from "../services/auth.jsx";
 import { useToast } from "../components/ui/ToastProvider.jsx";
 import StatCard from "../components/ui/StatCard.jsx";
@@ -12,6 +13,7 @@ import { useWebSocket } from "../services/useWebSocket.js";
 const Dashboard = () => {
   const { token, patient } = useAuth();
   const { pushToast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [doctors, setDoctors] = useState([]);
@@ -31,8 +33,8 @@ const Dashboard = () => {
           api.get("/api/patient/notifications?page=0&size=3", token),
         ]);
         if (!active) return;
-        setDoctors(normalizeList(doctorsRes).list || []);
-        setAppointments(normalizeList(appointmentsRes).list || []);
+        setDoctors((normalizeList(doctorsRes).list || []).map(normalizeDoctor));
+        setAppointments((normalizeList(appointmentsRes).list || []).map(normalizeAppointment));
         setNotifications(normalizeList(notificationsRes).list || []);
       } catch (err) {
         if (!active) return;
@@ -50,13 +52,21 @@ const Dashboard = () => {
 
   const metrics = useMemo(() => {
     const total = appointments.length;
-    const confirmed = appointments.filter((item) => (item.status || item.estado) === "CONFIRMED").length;
-    const scheduled = appointments.filter((item) => (item.status || item.estado) === "SCHEDULED").length;
+    const confirmed = appointments.filter((item) => item.status === "CONFIRMED").length;
+    const scheduled = appointments.filter((item) => item.status === "SCHEDULED").length;
+    const notifCount = notifications.length;
+
+    const pct = (n) => (total > 0 ? `${Math.round((n / total) * 100)}% del total` : undefined);
+    const notifDelta = notifCount > 0 ? "sin leer" : undefined;
+
     return {
       total,
       confirmed,
       scheduled,
-      notifications: notifications.length,
+      notifications: notifCount,
+      deltaConfirmed: pct(confirmed),
+      deltaScheduled: pct(scheduled),
+      deltaNotifications: notifDelta,
     };
   }, [appointments, notifications]);
 
@@ -87,10 +97,10 @@ const Dashboard = () => {
           ))
         ) : (
           <>
-            <StatCard label="Citas totales" value={metrics.total} delta="+4%" accent="blue" />
-            <StatCard label="Confirmadas" value={metrics.confirmed} delta="+2%" accent="green" />
-            <StatCard label="Pendientes" value={metrics.scheduled} delta="-1%" accent="orange" />
-            <StatCard label="Notificaciones" value={metrics.notifications} delta="+1%" accent="red" />
+            <StatCard label="Citas totales" value={metrics.total} accent="blue" />
+            <StatCard label="Confirmadas" value={metrics.confirmed} delta={metrics.deltaConfirmed} accent="green" />
+            <StatCard label="Pendientes" value={metrics.scheduled} delta={metrics.deltaScheduled} accent="orange" />
+            <StatCard label="Notificaciones" value={metrics.notifications} delta={metrics.deltaNotifications} accent="red" />
           </>
         )}
       </div>
@@ -112,16 +122,22 @@ const Dashboard = () => {
             ) : doctors.length ? (
               doctors.slice(0, 3).map((doctor) => (
                 <div key={doctor.id} className="doctor-info" style={{ marginBottom: 12 }}>
-                  <Avatar name={doctor.fullName || doctor.nombre} size="md" />
+                  <Avatar name={doctor.fullName} size="md" />
                   <div>
-                    <h4>{doctor.fullName || doctor.nombre}</h4>
-                    <p className="text-secondary">{doctor.specialty || doctor.especialidad}</p>
-                    <span className="text-muted">Tarifa ${doctor.fee || doctor.tarifa}</span>
+                    <h4>{doctor.fullName}</h4>
+                    <p className="text-secondary">{doctor.specialty}</p>
+                    <span className="text-muted">Tarifa ${doctor.fee}</span>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-muted">No hay medicos disponibles</div>
+              <div className="empty-state">
+                <strong>No hay médicos disponibles</strong>
+                <span className="text-muted">Intenta más tarde o revisa la sección de citas</span>
+                <button type="button" className="btn btn-primary" onClick={() => navigate("/appointments")}>
+                  Ver citas
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -139,17 +155,23 @@ const Dashboard = () => {
             ) : appointments.length ? (
               appointments.slice(0, 3).map((item) => (
                 <div key={item.id} style={{ marginBottom: 12 }}>
-                  <strong>{item.doctorName || item.medicoNombre}</strong>
+                  <strong>{item.doctorName}</strong>
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <span className="text-muted">{formatDateTime(item.dateTime || item.fecha)}</span>
+                    <span className="text-muted">{formatDateTime(item.dateTime)}</span>
                     <Badge variant={item.status === "CONFIRMED" ? "success" : "info"}>
-                      {item.status || item.estado}
+                      {item.status}
                     </Badge>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="text-muted">No hay citas proximas</div>
+              <div className="empty-state">
+                <strong>No hay citas próximas</strong>
+                <span className="text-muted">Agenda una cita con tu médico</span>
+                <button type="button" className="btn btn-primary" onClick={() => navigate("/appointments")}>
+                  Agendar cita
+                </button>
+              </div>
             )}
           </div>
         </div>

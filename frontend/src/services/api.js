@@ -1,3 +1,9 @@
+let logoutCallback = null;
+
+export const setLogoutCallback = (fn) => {
+  logoutCallback = fn;
+};
+
 const parseJson = async (response) => {
   try {
     return await response.json();
@@ -22,6 +28,9 @@ const request = async (url, options = {}) => {
   };
   const response = await fetch(url, { ...options, headers });
   if (!response.ok) {
+    if (response.status === 401 && logoutCallback) {
+      logoutCallback();
+    }
     throw await buildError(response);
   }
   const payload = await parseJson(response);
@@ -68,4 +77,19 @@ export const normalizeList = (response) => {
   }
   return { list: [], total: 0 };
 };
+
+export const normalizeDoctor = (raw) => ({
+  id: raw.id,
+  fullName: raw.fullName || raw.nombre,
+  specialty: raw.specialty || raw.especialidad,
+  fee: raw.fee || raw.tarifa,
+});
+
+export const normalizeAppointment = (raw) => ({
+  id: raw.id,
+  doctorName: raw.doctorName || raw.medicoNombre,
+  specialty: raw.specialty || raw.especialidad,
+  dateTime: raw.dateTime || raw.fecha,
+  status: raw.status || raw.estado,
+});
 

@@ -60,16 +60,18 @@ const AppRoutes = () => (
         </ProtectedRoute>
       }
     />
-    <Route
-      path="/ws-demo"
-      element={
-        <ProtectedRoute>
-          <AppShell>
-            <WsDemo />
-          </AppShell>
-        </ProtectedRoute>
-      }
-    />
+    {import.meta.env.DEV && (
+      <Route
+        path="/ws-demo"
+        element={
+          <ProtectedRoute>
+            <AppShell>
+              <WsDemo />
+            </AppShell>
+          </ProtectedRoute>
+        }
+      />
+    )}
     <Route path="*" element={<Navigate to="/dashboard" replace />} />
   </Routes>
 );

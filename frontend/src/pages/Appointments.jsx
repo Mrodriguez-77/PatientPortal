@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { api, normalizeList } from "../services/api.js";
+import { api, normalizeList, normalizeDoctor, normalizeAppointment } from "../services/api.js";
 import { useAuth } from "../services/auth.jsx";
 import { useToast } from "../components/ui/ToastProvider.jsx";
 import Skeleton from "../components/ui/Skeleton.jsx";
@@ -34,7 +34,7 @@ const Appointments = () => {
     setLoadingDoctors(true);
     try {
       const response = await api.get(`/api/doctors/available?specialty=${search}&page=0&size=10`, token);
-      setDoctors(normalizeList(response).list || []);
+      setDoctors((normalizeList(response).list || []).map(normalizeDoctor));
     } catch (error) {
       pushToast({ type: "error", title: "Error", message: error.message });
     } finally {
@@ -48,7 +48,7 @@ const Appointments = () => {
       const filter = nextStatus ? `&status=${nextStatus}` : "";
       const response = await api.get(`/api/patient/appointments?page=${nextPage}&size=10${filter}`, token);
       const normalized = normalizeList(response);
-      setAppointments(normalized.list || []);
+      setAppointments((normalized.list || []).map(normalizeAppointment));
       setTotalPages(normalized.total || 0);
     } catch (error) {
       pushToast({ type: "error", title: "Error", message: error.message });
@@ -69,7 +69,7 @@ const Appointments = () => {
   const filteredDoctors = useMemo(() => {
     if (!search) return doctors;
     return doctors.filter((doctor) =>
-      (doctor.fullName || doctor.nombre || "").toLowerCase().includes(search.toLowerCase())
+      (doctor.fullName || "").toLowerCase().includes(search.toLowerCase())
     );
   }, [doctors, search]);
 
@@ -132,9 +132,9 @@ const Appointments = () => {
               filteredDoctors.map((doctor) => (
                 <div key={doctor.id} className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
-                    <h4>{doctor.fullName || doctor.nombre}</h4>
-                    <p className="text-secondary">{doctor.specialty || doctor.especialidad}</p>
-                    <span className="text-muted">Tarifa ${doctor.fee || doctor.tarifa}</span>
+                    <h4>{doctor.fullName}</h4>
+                    <p className="text-secondary">{doctor.specialty}</p>
+                    <span className="text-muted">Tarifa ${doctor.fee}</span>
                   </div>
                   <button type="button" className="btn btn-primary" onClick={() => setSelectedDoctor(doctor)}>
                     Agendar
@@ -171,40 +171,42 @@ const Appointments = () => {
               {loadingAppointments ? (
                 [...Array(4)].map((_, index) => <Skeleton key={index} height={16} width="100%" />)
               ) : appointments.length ? (
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Doctor</th>
-                      <th>Especialidad</th>
-                      <th>Fecha</th>
-                      <th>Estado</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {appointments.map((appointment) => (
-                      <tr key={appointment.id}>
-                        <td>{appointment.doctorName || appointment.medicoNombre}</td>
-                        <td>{appointment.specialty || appointment.especialidad}</td>
-                        <td>{formatDateTime(appointment.dateTime || appointment.fecha)}</td>
-                        <td>
-                          <Badge variant={appointment.status === "CONFIRMED" ? "success" : "info"}>
-                            {appointment.status || appointment.estado}
-                          </Badge>
-                        </td>
-                        <td>
-                          {["SCHEDULED", "CONFIRMED"].includes(appointment.status || appointment.estado) ? (
-                            <button type="button" className="btn btn-danger" onClick={() => cancelAppointment(appointment)}>
-                              Cancelar
-                            </button>
-                          ) : (
-                            <span className="text-muted">-</span>
-                          )}
-                        </td>
+                <div className="table-scroll">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Doctor</th>
+                        <th>Especialidad</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {appointments.map((appointment) => (
+                        <tr key={appointment.id}>
+                          <td>{appointment.doctorName}</td>
+                          <td>{appointment.specialty}</td>
+                          <td>{formatDateTime(appointment.dateTime)}</td>
+                          <td>
+                            <Badge variant={appointment.status === "CONFIRMED" ? "success" : "info"}>
+                              {appointment.status}
+                            </Badge>
+                          </td>
+                          <td>
+                            {(["SCHEDULED", "CONFIRMED"].includes(appointment.status)) ? (
+                              <button type="button" className="btn btn-danger" onClick={() => cancelAppointment(appointment)}>
+                                Cancelar
+                              </button>
+                            ) : (
+                              <span className="text-muted">-</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               ) : (
                 <div className="empty-state">
                   <strong>No tienes citas aun</strong>
@@ -243,11 +245,11 @@ const Appointments = () => {
         >
           <div className="field">
             <span className="label">Medico</span>
-            <p>{selectedDoctor.fullName || selectedDoctor.nombre}</p>
+            <p>{selectedDoctor.fullName}</p>
           </div>
           <div className="field">
             <span className="label">Especialidad</span>
-            <p>{selectedDoctor.specialty || selectedDoctor.especialidad}</p>
+            <p>{selectedDoctor.specialty}</p>
           </div>
           <label className="field">
             <span className="label">Fecha y hora</span>

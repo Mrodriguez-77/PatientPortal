@@ -115,12 +115,13 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
     }
 
     @Override
-    public Object cancelAppointment(Long appointmentId) {
+    public Object cancelAppointment(Long patientId, Long appointmentId) {
         try {
             return clinicalEngineClient.put()
                     .uri(uriBuilder -> uriBuilder
                             .path("/api/appointments/{id}/status")
                             .queryParam("status", "CANCELLED")
+                            .queryParam("patientId", patientId)
                             .build(appointmentId))
                     .retrieve()
                     .bodyToMono(Object.class)

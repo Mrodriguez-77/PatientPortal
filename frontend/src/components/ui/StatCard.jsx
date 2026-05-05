@@ -5,12 +5,14 @@ const accents = {
   red: "var(--error-text)",
 };
 
+// delta is optional — omit the prop to render nothing below the value
 const StatCard = ({ label, value, accent = "blue", delta }) => (
   <div className="stat-card" style={{ borderLeftColor: accents[accent] || accents.blue }}>
     <span className="stat-label">{label}</span>
     <span className="stat-value">{value}</span>
-    {delta ? <span className="text-muted">{delta}</span> : null}
+    {delta != null ? <span className="text-muted">{delta}</span> : null}
   </div>
 );
 
 export default StatCard;
+

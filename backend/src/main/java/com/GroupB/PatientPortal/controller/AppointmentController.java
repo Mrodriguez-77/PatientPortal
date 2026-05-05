@@ -1,6 +1,7 @@
 package com.GroupB.PatientPortal.controller;
 
 import com.GroupB.PatientPortal.dto.ApiResponse;
+import com.GroupB.PatientPortal.exception.UnauthorizedException;
 import com.GroupB.PatientPortal.security.JwtUtil;
 import com.GroupB.PatientPortal.service.AppointmentProxyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -62,21 +63,23 @@ public class AppointmentController {
     @DeleteMapping("/api/patient/appointments/{id}")
     @Operation(summary = "Cancelar cita (proxy a Grupo A)")
     public ResponseEntity<ApiResponse<Object>> cancelAppointment(
+            HttpServletRequest request,
             @PathVariable Long id) {
+        Long patientId = extractPatientId(request);
         return ResponseEntity.ok(
                 ApiResponse.success("Cita cancelada exitosamente",
-                        appointmentProxyService.cancelAppointment(id)));
+                        appointmentProxyService.cancelAppointment(patientId, id)));
     }
 
     private Long extractPatientId(HttpServletRequest request) {
-        try {
-            String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                return jwtUtil.extractPatientId(authHeader.substring(7));
-            }
-        } catch (Exception e) {
-            // log error
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new UnauthorizedException("No autorizado");
         }
-        return 0L;
+        try {
+            return jwtUtil.extractPatientId(authHeader.substring(7));
+        } catch (Exception e) {
+            throw new UnauthorizedException("No autorizado");
+        }
     }
 }

@@ -111,20 +111,26 @@ button { font-family: inherit; }
   gap: 6px;
 }
 
-.navbar-links a {
-  color: #ffffffc9;
-  padding: 8px 12px;
+.navbar-toggle {
+  display: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  width: 36px;
+  height: 34px;
   border-radius: 8px;
-  font-size: 13px;
-  transition: background 0.2s ease, color 0.2s ease;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
 }
 
-.navbar-links a.active {
-  color: #60a5fa;
-}
-
-.navbar-links a:hover {
-  background: #ffffff1a;
+.navbar-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #fff;
+  border-radius: 999px;
 }
 
 .user-pill {
@@ -344,6 +350,11 @@ input:focus-visible, button:focus-visible, select:focus-visible, textarea:focus-
   border-collapse: collapse;
 }
 
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .table th, .table td {
   text-align: left;
   padding: 12px 10px;
@@ -552,13 +563,28 @@ input:focus-visible, button:focus-visible, select:focus-visible, textarea:focus-
 }
 
 @media (max-width: 900px) {
-  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  .grid-3 { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
+  .grid-2, .grid-4 { grid-template-columns: 1fr; }
   .navbar { padding: 0 12px; }
-  .navbar-links { display: none; }
-  .page-container { padding: 16px; }
+  .navbar-links {
+    display: none;
+    position: absolute;
+    top: 56px;
+    left: 12px;
+    right: 12px;
+    flex-direction: column;
+    background: var(--navy-dark);
+    padding: 12px;
+    border-radius: 12px;
+    gap: 4px;
+  }
+  .navbar-links.open { display: flex; }
+  .navbar-toggle { display: inline-flex; }
+  .page-container { padding: 16px 12px; }
+  .login-card { width: 95%; margin: 0 auto; }
 }
 
 .skeleton {

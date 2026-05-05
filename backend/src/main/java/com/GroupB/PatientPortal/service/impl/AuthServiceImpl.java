@@ -3,6 +3,10 @@ package com.GroupB.PatientPortal.service.impl;
 import com.GroupB.PatientPortal.dto.*;
 import com.GroupB.PatientPortal.entity.Patient;
 import com.GroupB.PatientPortal.enums.Role;
+import com.GroupB.PatientPortal.exception.BadRequestException;
+import com.GroupB.PatientPortal.exception.EmailAlreadyExistsException;
+import com.GroupB.PatientPortal.exception.InvalidCredentialsException;
+import com.GroupB.PatientPortal.exception.ResourceNotFoundException;
 import com.GroupB.PatientPortal.repository.PatientRepository;
 import com.GroupB.PatientPortal.security.JwtUtil;
 import com.GroupB.PatientPortal.service.AuthService;
@@ -25,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse register(RegisterRequest request) {
         if (patientRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new EmailAlreadyExistsException("El email ya está registrado");
         }
 
         Patient patient = Patient.builder()
@@ -59,10 +63,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public LoginResponse login(LoginRequest request) {
         Patient patient = patientRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("Credenciales inválidas"));
+                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
 
         if (!passwordEncoder.matches(request.getPassword(), patient.getPassword())) {
-            throw new RuntimeException("Credenciales inválidas");
+            throw new InvalidCredentialsException("Credenciales inválidas");
         }
 
         String token = jwtUtil.generateToken(
@@ -83,7 +87,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public PatientProfileResponse getProfile(String email) {
         Patient patient = patientRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
 
         return PatientProfileResponse.builder()
                 .id(patient.getId())
@@ -99,10 +103,10 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public void changePassword(String email, ChangePasswordRequest request) {
         Patient patient = patientRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Paciente no encontrado"));
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), patient.getPassword())) {
-            throw new RuntimeException("La contraseña actual es incorrecta");
+            throw new BadRequestException("La contraseña actual es incorrecta");
         }
 
         patient.setPassword(passwordEncoder.encode(request.getNewPassword()));

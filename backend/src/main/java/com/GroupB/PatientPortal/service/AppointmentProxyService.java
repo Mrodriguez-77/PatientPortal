@@ -13,5 +13,5 @@ public interface AppointmentProxyService {
 
     Object createAppointment(Long patientId, Long doctorId, LocalDateTime dateTime);
 
-    Object cancelAppointment(Long appointmentId);
+    Object cancelAppointment(Long patientId, Long appointmentId);
 }

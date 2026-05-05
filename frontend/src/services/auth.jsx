@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
-import { api } from "./api.js";
+import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { api, setLogoutCallback } from "./api.js";
 
 const AuthContext = createContext(null);
 
@@ -39,6 +39,11 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setPatient({ id: null, name: null, email: null });
   };
+
+  useEffect(() => {
+    setLogoutCallback(clearSession);
+    return () => setLogoutCallback(null);
+  }, []);
 
   const login = async (email, password) => {
     const response = await api.post("/api/auth/login", { email, password });

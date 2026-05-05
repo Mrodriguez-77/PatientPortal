@@ -6,6 +6,7 @@ import { useAuth } from "../../services/auth.jsx";
 const TopNav = () => {
   const { patient, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -27,13 +28,25 @@ const TopNav = () => {
           <span className="logo-text">Patient Portal</span>
         </div>
       </div>
-      <nav className="navbar-links">
-        <NavLink to="/dashboard">Inicio</NavLink>
-        <NavLink to="/appointments">Citas</NavLink>
-        <NavLink to="/notifications">Notificaciones</NavLink>
-        <NavLink to="/ws-demo">Tiempo real</NavLink>
+      <nav className={`navbar-links ${mobileOpen ? "open" : ""}`}>
+        <NavLink to="/dashboard" onClick={() => setMobileOpen(false)}>Inicio</NavLink>
+        <NavLink to="/appointments" onClick={() => setMobileOpen(false)}>Citas</NavLink>
+        <NavLink to="/notifications" onClick={() => setMobileOpen(false)}>Notificaciones</NavLink>
+        {import.meta.env.DEV && (
+          <NavLink to="/ws-demo" onClick={() => setMobileOpen(false)}>Tiempo real</NavLink>
+        )}
       </nav>
       <div className="navbar-right" ref={menuRef}>
+        <button
+          type="button"
+          className="navbar-toggle"
+          aria-label="Toggle navigation"
+          onClick={() => setMobileOpen((prev) => !prev)}
+        >
+          <span />
+          <span />
+          <span />
+        </button>
         <button type="button" className="user-pill" onClick={() => setOpen((prev) => !prev)}>
           <Avatar name={patient?.name || "Paciente"} size="sm" />
           <span>{patient?.name || "Paciente"}</span>
