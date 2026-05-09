@@ -3,73 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cita Confirmada</title>
+    <title>Cita Confirmada — Patient Portal</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f0ff; padding: 24px; }
-        .wrapper { max-width: 580px; margin: 0 auto; }
-        .header { background: #6366f1; border-radius: 12px 12px 0 0; padding: 28px 32px; text-align: center; }
-        .header .logo { color: white; font-size: 22px; font-weight: 600; }
-        .header .subtitle { color: rgba(255,255,255,0.8); font-size: 13px; margin-top: 4px; }
-        .body { background: white; padding: 36px 32px; }
-        .icon { font-size: 48px; text-align: center; margin-bottom: 16px; }
-        .greeting { font-size: 18px; font-weight: 600; color: #1e1e2e; margin-bottom: 8px; }
-        .message { font-size: 14px; color: #555; line-height: 1.6; margin-bottom: 24px; }
-        .detail-card { background: #f8f9ff; border-left: 4px solid #6366f1; border-radius: 0 8px 8px 0; padding: 16px 20px; margin-bottom: 24px; }
-        .detail-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eef2ff; font-size: 13px; }
-        .detail-row:last-child { border-bottom: none; }
-        .detail-label { color: #888; }
-        .detail-value { color: #333; font-weight: 500; }
-        .btn { display: inline-block; background: #6366f1; color: white !important; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-size: 14px; font-weight: 500; }
-        .badge-success { display: inline-block; background: #f0fff4; color: #2e7d32; padding: 4px 14px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-bottom: 20px; }
-        .footer { background: #f8f9ff; border-radius: 0 0 12px 12px; padding: 20px 32px; text-align: center; }
-        .footer p { font-size: 12px; color: #aaa; line-height: 1.6; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #e8edf2; padding: 24px 16px; }
+        .wrapper { max-width: 580px; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 40px rgba(15,39,68,.18); }
+
+        /* HEADER */
+        .hd { background: linear-gradient(135deg, #0f2744 0%, #1e3a5f 60%, #1e6fbf 100%); padding: 32px 36px 28px; position: relative; overflow: hidden; }
+        .hd-dots  { position: absolute; top: -20px; right: -20px; width: 160px; height: 160px; opacity: .08; background-image: radial-gradient(circle, white 1.5px, transparent 1.5px); background-size: 16px 16px; }
+        .hd-circle{ position: absolute; bottom: -40px; left: -40px; width: 180px; height: 180px; border-radius: 50%; opacity: .06; background: white; }
+        .logo-cross-box { display: inline-block; width: 34px; height: 34px; background: rgba(255,255,255,.15); border-radius: 8px; text-align: center; line-height: 34px; font-size: 20px; color: white; font-weight: 700; vertical-align: middle; }
+        .logo-name { display: inline-block; vertical-align: middle; padding-left: 10px; color: white; font-size: 15px; font-weight: 600; }
+        .logo-sub  { color: rgba(255,255,255,.55); font-size: 11px; padding-left: 44px; margin-top: 2px; }
+        .logo-row  { margin-bottom: 20px; }
+        .badge     { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 10px; background: rgba(22,163,74,.2); color: #86efac; border: 1px solid rgba(134,239,172,.25); }
+        .hd-title  { color: white; font-size: 22px; font-weight: 600; line-height: 1.3; }
+        .hd-title span { opacity: .6; font-weight: 400; }
+
+        /* BODY */
+        .bd        { background: white; padding: 32px 36px; }
+        .greeting  { font-size: 15px; font-weight: 600; color: #0f2744; margin-bottom: 6px; }
+        .subtext   { font-size: 13px; color: #64748b; line-height: 1.7; margin-bottom: 24px; }
+
+        /* TABLE */
+        .detail    { width: 100%; border-collapse: collapse; margin-bottom: 24px; }
+        .th-l      { background: #0f2744; color: white; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; padding: 10px 16px; border-radius: 10px 0 0 0; }
+        .th-r      { background: #0f2744; color: white; font-size: 11px; padding: 10px 16px; border-radius: 0 10px 0 0; text-align: right; }
+        .td-l      { color: #94a3b8; font-size: 12px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; }
+        .td-r      { color: #0f2744; font-weight: 500; font-size: 12px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; }
+        .hl-l      { background: #eff6ff; color: #94a3b8; font-size: 12px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; }
+        .hl-r      { background: #eff6ff; color: #1e6fbf; font-weight: 600; font-size: 12px; padding: 11px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; }
+        .td-last-l { color: #94a3b8; font-size: 12px; padding: 11px 16px; }
+        .td-last-r { color: #0f2744; font-weight: 500; font-size: 12px; padding: 11px 16px; text-align: right; }
+
+        /* NOTE */
+        .note { border-left: 3px solid #1e6fbf; background: #eff6ff; border-radius: 0 8px 8px 0; padding: 13px 16px; font-size: 12px; color: #1e3a5f; line-height: 1.7; margin-bottom: 24px; }
+
+        /* BUTTONS */
+        .btn-primary { display: inline-block; background: #0f2744; color: white !important; text-decoration: none; padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; }
+        .btn-ghost   { display: inline-block; border: 1.5px solid #e2e8f0; color: #475569 !important; text-decoration: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; margin-left: 8px; }
+
+        /* FOOTER */
+        .ft        { background: #f8fafc; padding: 18px 36px; border-top: 1px solid #f1f5f9; text-align: center; }
+        .ft a      { font-size: 11px; color: #94a3b8; text-decoration: none; margin: 0 8px; }
+        .ft-copy   { font-size: 11px; color: #cbd5e1; line-height: 1.6; margin-top: 10px; }
     </style>
 </head>
 <body>
 <div class="wrapper">
-    <div class="header">
-        <div class="logo">+ Patient Portal</div>
-        <div class="subtitle">Sistema de Clínica Médica</div>
-    </div>
-    <div class="body">
-        <div class="icon">✅</div>
-        <span class="badge-success">Cita Confirmada</span>
-        <div class="greeting" th:text="'Hola, ' + ${patientName} + '!'">Hola, Paciente!</div>
-        <p class="message">
-            Tu cita médica ha sido confirmada exitosamente.
-            A continuación encontrarás los detalles de tu cita.
-        </p>
-        <div class="detail-card">
-            <div class="detail-row">
-                <span class="detail-label">Médico</span>
-                <span class="detail-value" th:text="${doctorName}">Dr. —</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Especialidad</span>
-                <span class="detail-value" th:text="${specialty}">—</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">Fecha y hora</span>
-                <span class="detail-value" th:text="${dateTime}">—</span>
-            </div>
-            <div class="detail-row">
-                <span class="detail-label">N° de cita</span>
-                <span class="detail-value" th:text="'#' + ${appointmentId}">—</span>
-            </div>
+
+    <div class="hd">
+        <div class="hd-dots"></div>
+        <div class="hd-circle"></div>
+        <div class="logo-row">
+            <span class="logo-cross-box">+</span>
+            <span class="logo-name">Patient Portal</span>
+            <div class="logo-sub">Sistema de Clínica Médica</div>
         </div>
-        <p style="font-size:13px;color:#888;margin-bottom:20px;">
-            Te enviaremos un recordatorio 24 horas antes de tu cita.
-            Si necesitas cancelar, puedes hacerlo desde el portal.
+        <div class="badge">✓ &nbsp;Cita confirmada</div>
+        <p class="hd-title">Tu cita ha sido<br><span>confirmada exitosamente</span></p>
+    </div>
+
+    <div class="bd">
+        <p class="greeting" th:text="'Hola, ' + ${patientName} + ' 👋'">Hola, Paciente 👋</p>
+        <p class="subtext">
+            Tu cita médica ha sido confirmada. A continuación encontrarás todos los detalles.
+            Recibirás un recordatorio 24 horas antes de tu cita.
         </p>
-        <a href="http://localhost:8083/pages/appointments.html" class="btn">
-            Ver mi cita
-        </a>
+
+        <table class="detail">
+            <tr><td class="th-l">Detalle de la cita</td><td class="th-r">Información</td></tr>
+            <tr><td class="td-l">Médico</td><td class="td-r" th:text="${doctorName}">Dr. —</td></tr>
+            <tr><td class="td-l">Especialidad</td><td class="td-r" th:text="${specialty}">—</td></tr>
+            <tr><td class="hl-l">Fecha y hora</td><td class="hl-r" th:text="${dateTime}">—</td></tr>
+            <tr><td class="td-last-l">N° de cita</td><td class="td-last-r" th:text="'#APT-' + ${appointmentId}">#APT-—</td></tr>
+        </table>
+
+        <div class="note">
+            📋 &nbsp;Recuerda llegar <strong>10 minutos antes</strong> de tu cita y traer tu documento
+            de identidad. Si necesitas cancelar, hazlo con al menos 24h de anticipación desde el portal.
+        </div>
+
+        <a th:href="${portalUrl + '/appointments'}" href="#" class="btn-primary">Ver mi cita en el portal</a>
+        <a th:href="${portalUrl + '/appointments'}" href="#" class="btn-ghost">Cancelar cita</a>
     </div>
-    <div class="footer">
-        <p>Este es un correo automático, por favor no responder directamente.</p>
-        <p style="margin-top:10px;color:#ccc;">© 2026 Patient Portal · Clínica Médica</p>
+
+    <div class="ft">
+        <a th:href="${portalUrl}" href="#">Portal de pacientes</a>
+        <a href="#">Soporte</a>
+        <a href="#">Política de privacidad</a>
+        <p class="ft-copy">
+            Correo automático · Por favor no responder directamente<br>
+            © 2026 Patient Portal · Clínica Médica
+        </p>
     </div>
+
 </div>
 </body>
 </html>

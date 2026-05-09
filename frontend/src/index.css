@@ -111,6 +111,22 @@ button { font-family: inherit; }
   gap: 6px;
 }
 
+.navbar-links a {
+  color: #ffffffc9;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.navbar-links a.active {
+  color: #60a5fa;
+}
+
+.navbar-links a:hover {
+  background: #ffffff1a;
+}
+
 .navbar-toggle {
   display: none;
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -316,6 +332,16 @@ input:focus-visible, button:focus-visible, select:focus-visible, textarea:focus-
   flex-direction: column;
   gap: 6px;
   border-left: 3px solid var(--blue-primary);
+}
+
+.stat-card.clickable {
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px #00000014;
 }
 
 .stat-label {

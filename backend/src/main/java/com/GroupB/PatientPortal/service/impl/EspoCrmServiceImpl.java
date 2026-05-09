@@ -5,7 +5,6 @@ import com.GroupB.PatientPortal.service.EspoCrmService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import java.util.HashMap;
@@ -23,27 +22,20 @@ public class EspoCrmServiceImpl implements EspoCrmService {
 
     @Override
     public void syncContact(Patient patient) {
-        try {
-            String[] nameParts = patient.getFullName().split(" ", 2);
-            String firstName = nameParts[0];
-            String lastName = nameParts.length > 1 ? nameParts[1] : "";
+        String[] parts = patient.getFullName().split(" ", 2);
+        Map<String, Object> body = new HashMap<>();
+        body.put("firstName", parts[0]);
+        body.put("lastName", parts.length > 1 ? parts[1] : "");
+        body.put("emailAddress", patient.getEmail());
+        body.put("description", "Registrado via Patient Portal");
 
-            Map<String, Object> body = new HashMap<>();
-            body.put("firstName", firstName);
-            body.put("lastName", lastName);
-            body.put("emailAddress", patient.getEmail());
-            body.put("description", "Registrado via Patient Portal");
+        espoCrmClient.post()
+                .uri("/api/v1/Contact")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
 
-            espoCrmClient.post()
-                    .uri("/api/v1/Contact")
-                    .bodyValue(body)
-                    .retrieve()
-                    .bodyToMono(String.class)
-                    .block();
-
-            log.info("Contacto sincronizado con EspoCRM: {}", patient.getEmail());
-        } catch (Exception e) {
-            log.error("Error al sincronizar con EspoCRM: {}", e.getMessage());
-        }
+        log.info("Contacto sincronizado con EspoCRM: {}", patient.getEmail());
     }
 }

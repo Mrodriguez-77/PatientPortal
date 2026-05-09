@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { api, setLogoutCallback } from "./api.js";
 
 const AuthContext = createContext(null);
@@ -62,11 +62,11 @@ export const AuthProvider = ({ children }) => {
     return response?.data || response;
   };
 
-  const getProfile = async () => {
+  const getProfile = useCallback(async () => {
     if (!token) return null;
     const response = await api.get("/api/auth/me", token);
     return response?.data || response;
-  };
+  }, [token]);
 
   const changePassword = async (payload) => {
     if (!token) throw new Error("No hay sesion activa");
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
       changePassword,
       logout: clearSession,
     }),
-    [token, patient]
+    [token, patient, getProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -54,16 +54,18 @@ const Dashboard = () => {
     const total = appointments.length;
     const confirmed = appointments.filter((item) => item.status === "CONFIRMED").length;
     const scheduled = appointments.filter((item) => item.status === "SCHEDULED").length;
-    const notifCount = notifications.length;
+    const notifTotal = notifications.length;
+    const notifUnread = notifications.filter((item) => !item.read).length;
 
     const pct = (n) => (total > 0 ? `${Math.round((n / total) * 100)}% del total` : undefined);
-    const notifDelta = notifCount > 0 ? "sin leer" : undefined;
+    const notifDelta = notifTotal > 0 ? `${notifUnread} sin leer` : undefined;
 
     return {
       total,
       confirmed,
       scheduled,
-      notifications: notifCount,
+      notifications: notifTotal,
+      notificationsUnread: notifUnread,
       deltaConfirmed: pct(confirmed),
       deltaScheduled: pct(scheduled),
       deltaNotifications: notifDelta,
@@ -97,10 +99,33 @@ const Dashboard = () => {
           ))
         ) : (
           <>
-            <StatCard label="Citas totales" value={metrics.total} accent="blue" />
-            <StatCard label="Confirmadas" value={metrics.confirmed} delta={metrics.deltaConfirmed} accent="green" />
-            <StatCard label="Pendientes" value={metrics.scheduled} delta={metrics.deltaScheduled} accent="orange" />
-            <StatCard label="Notificaciones" value={metrics.notifications} delta={metrics.deltaNotifications} accent="red" />
+            <StatCard
+              label="Citas totales"
+              value={metrics.total}
+              accent="blue"
+              onClick={() => navigate("/appointments")}
+            />
+            <StatCard
+              label="Confirmadas"
+              value={metrics.confirmed}
+              delta={metrics.deltaConfirmed}
+              accent="green"
+              onClick={() => navigate("/appointments")}
+            />
+            <StatCard
+              label="Pendientes"
+              value={metrics.scheduled}
+              delta={metrics.deltaScheduled}
+              accent="orange"
+              onClick={() => navigate("/appointments")}
+            />
+            <StatCard
+              label="Notificaciones"
+              value={metrics.notificationsUnread}
+              delta={metrics.deltaNotifications}
+              accent="red"
+              onClick={() => navigate("/notifications")}
+            />
           </>
         )}
       </div>

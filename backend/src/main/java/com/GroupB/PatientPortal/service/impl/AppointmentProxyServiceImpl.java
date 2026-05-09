@@ -29,7 +29,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
 
     @Override
     @Cacheable(value = "doctors", key = "#specialty + '_' + #pageable.pageNumber")
-    public Object getDoctors(String specialty, Pageable pageable) {
+    public Object getDoctors(String specialty, Pageable pageable, String jwtToken) {
         try {
             String uri = UriComponentsBuilder.fromPath("/api/doctors")
                     .queryParam("page", pageable.getPageNumber())
@@ -42,6 +42,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
 
             Object response = clinicalEngineClient.get()
                     .uri(uri)
+                    .header("Authorization", jwtToken)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -63,7 +64,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
 
 
     @Override
-    public Object getPatientAppointments(Long patientId, String status, Pageable pageable) {
+    public Object getPatientAppointments(Long patientId, String status, Pageable pageable, String jwtToken) {
         try {
             String uri = "/api/appointments/patient/" + patientId
                     + "?page=" + pageable.getPageNumber()
@@ -73,6 +74,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
 
             Object response = clinicalEngineClient.get()
                     .uri(uri)
+                    .header("Authorization", jwtToken)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -94,7 +96,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
 
     @Override
     @CacheEvict(value = "doctors", allEntries = true)
-    public Object createAppointment(Long patientId, Long doctorId, LocalDateTime dateTime) {
+    public Object createAppointment(Long patientId, Long doctorId, LocalDateTime dateTime, String jwtToken) {
         try {
             String formattedDate = dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
@@ -105,6 +107,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
                             .queryParam("doctorId", doctorId)
                             .queryParam("dateTime", formattedDate)
                             .build())
+                    .header("Authorization", jwtToken)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();
@@ -115,7 +118,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
     }
 
     @Override
-    public Object cancelAppointment(Long patientId, Long appointmentId) {
+    public Object cancelAppointment(Long patientId, Long appointmentId, String jwtToken) {
         try {
             return clinicalEngineClient.put()
                     .uri(uriBuilder -> uriBuilder
@@ -123,6 +126,7 @@ public class AppointmentProxyServiceImpl implements AppointmentProxyService {
                             .queryParam("status", "CANCELLED")
                             .queryParam("patientId", patientId)
                             .build(appointmentId))
+                    .header("Authorization", jwtToken)
                     .retrieve()
                     .bodyToMono(Object.class)
                     .block();

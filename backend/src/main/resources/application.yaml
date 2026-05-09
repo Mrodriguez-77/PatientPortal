@@ -27,7 +27,7 @@ spring:
     password: admin
     listener:
       simple:
-        acknowledge-mode: auto
+        acknowledge-mode: manual
         retry:
           enabled: true
           initial-interval: 1000ms
@@ -63,6 +63,11 @@ spring:
         host: ${REDIS_HOST:localhost}
         port: 6379
 
+  data:
+    web:
+      pageable:
+        max-page-size: 50
+
 jwt:
   secret: ${JWT_SECRET:clave-secreta-super-segura-minimo-256-bits-patient-portal-2025}
   expiration: 86400000
@@ -70,9 +75,9 @@ jwt:
 clinical:
   engine:
     # url local (sin Grupo A):
-    #url: http://localhost:8081
+    url: http://localhost:8081
     # url para defensa (con Grupo A):
-    url: https://leigha-attestative-astrally.ngrok-free.dev/
+    #url: https://leigha-attestative-astrally.ngrok-free.dev/
 
 espocrm:
   url: http://localhost:8082
@@ -84,3 +89,5 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
+app:
+  portal-url: http://localhost:8083

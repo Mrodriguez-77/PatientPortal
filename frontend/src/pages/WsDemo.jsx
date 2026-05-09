@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { useAuth } from "../services/auth.jsx";
 import { useWebSocket } from "../services/useWebSocket.js";
 import StatCard from "../components/ui/StatCard.jsx";
@@ -7,15 +7,11 @@ import { formatDateTime } from "../utils/formatters.js";
 const WsDemo = () => {
   const { patient, token } = useAuth();
   const { messages, isConnected } = useWebSocket(patient?.id, token);
-  const [log, setLog] = useState(messages);
 
   const stats = useMemo(() => {
-    const pending = log.filter((item) => item.newStatus === "SCHEDULED").length;
-    return { total: log.length, pending };
-  }, [log]);
-
-  const connect = () => setLog(messages);
-  const clear = () => setLog([]);
+    const pending = messages.filter((item) => item.newStatus === "SCHEDULED").length;
+    return { total: messages.length, pending };
+  }, [messages]);
 
   return (
     <div>
@@ -27,10 +23,7 @@ const WsDemo = () => {
             <span className="text-secondary">{isConnected ? "Conectado" : "Desconectado"}</span>
           </div>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
-          <button type="button" className="btn btn-secondary" onClick={connect}>Conectar</button>
-          <button type="button" className="btn btn-secondary" onClick={clear}>Limpiar</button>
-        </div>
+        <div style={{ display: "flex", gap: 8 }} />
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 16 }}>
@@ -39,7 +32,7 @@ const WsDemo = () => {
           <div className="card-body">
             <div className="log-box">
               <div className="log-line">Estado: {isConnected ? "Conectado" : "Desconectado"}</div>
-              {log.map((item, index) => (
+              {messages.map((item, index) => (
                 <div key={index} className="log-line">
                   {formatDateTime(item.timestamp)} - {item.doctorName || "Doctor"} {item.newStatus}
                 </div>
@@ -56,11 +49,10 @@ const WsDemo = () => {
       <div className="card">
         <div className="card-header" style={{ display: "flex", justifyContent: "space-between" }}>
           <span>Eventos recibidos</span>
-          <button type="button" className="btn btn-secondary" onClick={clear}>Limpiar</button>
         </div>
         <div className="card-body">
-          {log.length ? (
-            log.map((item, index) => (
+          {messages.length ? (
+            messages.map((item, index) => (
               <div key={index} style={{ marginBottom: 10 }}>
                 <strong>{item.doctorName || "Doctor"}</strong>
                 <p className="text-secondary">{item.newStatus}</p>

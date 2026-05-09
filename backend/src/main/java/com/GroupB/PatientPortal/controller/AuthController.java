@@ -63,7 +63,10 @@ public class AuthController {
     @Operation(summary = "Solicitar recuperación de contraseña")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(
             @RequestBody java.util.Map<String, String> body) {
-        // No revelar si el email existe o no (prevención de enumeración)
+        String email = body.getOrDefault("email", "");
+        if (!email.isBlank()) {
+            authService.requestPasswordReset(email);
+        }
         return ResponseEntity.ok(
                 ApiResponse.success("Si el email existe, recibirás instrucciones", null));
     }

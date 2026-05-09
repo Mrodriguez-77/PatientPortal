@@ -2,6 +2,7 @@ package com.GroupB.PatientPortal.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -18,22 +19,30 @@ public class RabbitMQConfig {
     public static final String ROUTING_CONFIRMED = "appointment.confirmed";
     public static final String ROUTING_CANCELLED = "appointment.cancelled";
     public static final String ROUTING_STATUS_CHANGED = "appointment.status.changed";
+    public static final String ROUTING_ESPOCRM = "espocrm.sync";
 
     // ── Queues principales ──────────────────────────────────────
     public static final String QUEUE_CONFIRMED = "patient.appointments.confirmed";
     public static final String QUEUE_CANCELLED = "patient.appointments.cancelled";
     public static final String QUEUE_STATUS_CHANGED = "patient.appointments.status.changed";
+    public static final String QUEUE_ESPOCRM_SYNC = "espocrm.sync.queue";
 
     // ── Dead Letter Queue ───────────────────────────────────────
     public static final String DLQ_EXCHANGE = "appointments.dlx";
     public static final String DLQ_CONFIRMED = "patient.appointments.confirmed.dlq";
     public static final String DLQ_CANCELLED = "patient.appointments.cancelled.dlq";
     public static final String DLQ_STATUS_CHANGED = "patient.appointments.status.changed.dlq";
+    public static final String QUEUE_ESPOCRM_DLQ = "espocrm.sync.dlq";
 
     // ── Serialización JSON ──────────────────────────────────────
     @Bean
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
+    }
+
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        return new RabbitAdmin(connectionFactory);
     }
 
     @Bean
@@ -80,6 +89,14 @@ public class RabbitMQConfig {
                 .build();
     }
 
+    @Bean
+    public Queue espoCrmSyncQueue() {
+        return QueueBuilder.durable(QUEUE_ESPOCRM_SYNC)
+                .withArgument("x-dead-letter-exchange", DLQ_EXCHANGE)
+                .withArgument("x-dead-letter-routing-key", QUEUE_ESPOCRM_DLQ)
+                .build();
+    }
+
     // ── Dead Letter Queues ──────────────────────────────────────
     @Bean
     public Queue dlqConfirmed() {
@@ -94,6 +111,11 @@ public class RabbitMQConfig {
     @Bean
     public Queue dlqStatusChanged() {
         return new Queue(DLQ_STATUS_CHANGED, true);
+    }
+
+    @Bean
+    public Queue dlqEspoCrmSync() {
+        return new Queue(QUEUE_ESPOCRM_DLQ, true);
     }
 
     // ── Bindings principales ────────────────────────────────────
@@ -118,6 +140,13 @@ public class RabbitMQConfig {
                 .with(ROUTING_STATUS_CHANGED);
     }
 
+    @Bean
+    public Binding espoCrmSyncBinding() {
+        return BindingBuilder.bind(espoCrmSyncQueue())
+                .to(appointmentsExchange())
+                .with(ROUTING_ESPOCRM);
+    }
+
     // ── Bindings DLQ ────────────────────────────────────────────
     @Bean
     public Binding dlqConfirmedBinding() {
@@ -139,4 +168,12 @@ public class RabbitMQConfig {
                 .to(deadLetterExchange())
                 .with(DLQ_STATUS_CHANGED);
     }
+
+    @Bean
+    public Binding dlqEspoCrmSyncBinding() {
+        return BindingBuilder.bind(dlqEspoCrmSync())
+                .to(deadLetterExchange())
+                .with(QUEUE_ESPOCRM_DLQ);
+    }
+
 }

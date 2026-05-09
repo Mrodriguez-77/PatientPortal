@@ -28,22 +28,31 @@ public class EmailServiceImpl implements EmailService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
+    @Value("${app.portal-url:http://localhost:8083}")
+    private String portalUrl;
+
     private static final DateTimeFormatter FORMATTER =
             DateTimeFormatter.ofPattern("dd 'de' MMMM 'de' yyyy 'a las' HH:mm",
                     new Locale("es", "ES"));
 
+    private static final DateTimeFormatter TIME_FORMATTER =
+            DateTimeFormatter.ofPattern("hh:mm a", new Locale("es", "ES"));
+
+    // ─────────────────────────────────────────────────────────────────
+    //  CONFIRMACIÓN
+    // ─────────────────────────────────────────────────────────────────
     @Override
     @Async
     public void sendConfirmationEmail(AppointmentEventMessage event) {
         try {
             Context ctx = new Context(new Locale("es", "ES"));
-            ctx.setVariable("patientName", event.getPatientName());
-            ctx.setVariable("doctorName", event.getDoctorName());
-            ctx.setVariable("specialty", event.getSpecialty());
-            ctx.setVariable("dateTime",
-                    event.getDateTime() != null
-                            ? event.getDateTime().format(FORMATTER) : "—");
+            ctx.setVariable("patientName",   event.getPatientName());
+            ctx.setVariable("doctorName",    event.getDoctorName());
+            ctx.setVariable("specialty",     event.getSpecialty() != null ? event.getSpecialty() : "—");
+            ctx.setVariable("dateTime",      event.getDateTime() != null
+                    ? event.getDateTime().format(FORMATTER) : "—");
             ctx.setVariable("appointmentId", event.getAppointmentId());
+            ctx.setVariable("portalUrl",     portalUrl);
 
             sendEmail(
                     event.getPatientEmail(),
@@ -52,24 +61,30 @@ public class EmailServiceImpl implements EmailService {
                     ctx
             );
         } catch (Exception e) {
-            log.error("Error enviando email de confirmación: {}", e.getMessage());
+            log.error("Error enviando email de confirmación a {}: {}",
+                    event.getPatientEmail(), e.getMessage());
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    //  CANCELACIÓN
+    // ─────────────────────────────────────────────────────────────────
     @Override
     @Async
     public void sendCancellationEmail(AppointmentEventMessage event) {
         try {
             Context ctx = new Context(new Locale("es", "ES"));
-            ctx.setVariable("patientName", event.getPatientName());
-            ctx.setVariable("doctorName", event.getDoctorName());
-            ctx.setVariable("specialty", event.getSpecialty());
-            ctx.setVariable("dateTime",
-                    event.getDateTime() != null
-                            ? event.getDateTime().format(FORMATTER) : "—");
-            ctx.setVariable("cancellationReason",
-                    event.getCancellationReason() != null
-                            ? event.getCancellationReason() : "No especificada");
+            ctx.setVariable("patientName",        event.getPatientName());
+            ctx.setVariable("doctorName",         event.getDoctorName());
+            ctx.setVariable("specialty",          event.getSpecialty() != null ? event.getSpecialty() : "—");
+            ctx.setVariable("dateTime",           event.getDateTime() != null
+                    ? event.getDateTime().format(FORMATTER) : "—");
+            ctx.setVariable("appointmentId",      event.getAppointmentId());
+            ctx.setVariable("cancellationReason", event.getCancellationReason() != null
+                    && !event.getCancellationReason().isBlank()
+                    ? event.getCancellationReason()
+                    : "No especificada");
+            ctx.setVariable("portalUrl",          portalUrl);
 
             sendEmail(
                     event.getPatientEmail(),
@@ -78,27 +93,38 @@ public class EmailServiceImpl implements EmailService {
                     ctx
             );
         } catch (Exception e) {
-            log.error("Error enviando email de cancelación: {}", e.getMessage());
+            log.error("Error enviando email de cancelación a {}: {}",
+                    event.getPatientEmail(), e.getMessage());
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    //  RECORDATORIO
+    // ─────────────────────────────────────────────────────────────────
     @Override
     @Async
     public void sendReminderEmail(AppointmentReminder reminder) {
         try {
+            int hours = reminder.getHoursBeforeAppointment() != null
+                    ? reminder.getHoursBeforeAppointment() : 24;
+
+            // La cita real = scheduledSendTime + hoursBeforeAppointment
+            var appointmentDateTime = reminder.getScheduledSendTime() != null
+                    ? reminder.getScheduledSendTime().plusHours(hours)
+                    : null;
+
             Context ctx = new Context(new Locale("es", "ES"));
-            ctx.setVariable("patientName", reminder.getPatient().getFullName());
-            ctx.setVariable("doctorName", reminder.getDoctorName());
-            ctx.setVariable("dateTime",
-                    reminder.getScheduledSendTime() != null
-                            ? reminder.getScheduledSendTime()
-                              .plusHours(reminder.getHoursBeforeAppointment() != null
-                                         ? reminder.getHoursBeforeAppointment() : 24)
-                              .format(FORMATTER) : "—");
-            ctx.setVariable("appointmentId", reminder.getAppointmentId());
-            ctx.setVariable("hoursLeft",
-                    reminder.getHoursBeforeAppointment() != null
-                            ? reminder.getHoursBeforeAppointment() : 24);
+            ctx.setVariable("patientName",     reminder.getPatient().getFullName());
+            ctx.setVariable("doctorName",      reminder.getDoctorName());
+            ctx.setVariable("specialty",       reminder.getSpecialty() != null
+                    ? reminder.getSpecialty() : "—");
+            ctx.setVariable("dateTime",        appointmentDateTime != null
+                    ? appointmentDateTime.format(FORMATTER) : "—");
+            ctx.setVariable("appointmentTime", appointmentDateTime != null
+                    ? appointmentDateTime.format(TIME_FORMATTER) : "—");
+            ctx.setVariable("appointmentId",   reminder.getAppointmentId());
+            ctx.setVariable("hoursLeft",       hours);
+            ctx.setVariable("portalUrl",       portalUrl);
 
             sendEmail(
                     reminder.getPatient().getEmail(),
@@ -107,10 +133,14 @@ public class EmailServiceImpl implements EmailService {
                     ctx
             );
         } catch (Exception e) {
-            log.error("Error enviando email de recordatorio: {}", e.getMessage());
+            log.error("Error enviando email de recordatorio a {}: {}",
+                    reminder.getPatient().getEmail(), e.getMessage());
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    //  HELPER INTERNO
+    // ─────────────────────────────────────────────────────────────────
     private void sendEmail(String to, String subject,
                            String templateName, Context ctx)
             throws MessagingException {
@@ -120,8 +150,9 @@ public class EmailServiceImpl implements EmailService {
         helper.setTo(to);
         helper.setSubject(subject);
         helper.setText(html, true);
-        helper.setFrom(fromEmail.isBlank() ? "noreply@patientportal.com" : fromEmail);
+        helper.setFrom(fromEmail == null || fromEmail.isBlank()
+                ? "noreply@patientportal.com" : fromEmail);
         mailSender.send(message);
-        log.info("Email enviado a {} - asunto: {}", to, subject);
+        log.info("Email enviado → to={} subject={}", to, subject);
     }
 }

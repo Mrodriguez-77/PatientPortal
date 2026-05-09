@@ -32,7 +32,7 @@ const Profile = () => {
   const validate = () => {
     const nextErrors = {};
     if (!form.currentPassword) nextErrors.currentPassword = "Campo requerido";
-    if (!form.newPassword || form.newPassword.length < 6) nextErrors.newPassword = "Minimo 6 caracteres";
+    if (!form.newPassword || form.newPassword.length < 6) nextErrors.newPassword = "Mínimo 6 caracteres";
     if (form.newPassword !== form.confirmPassword) nextErrors.confirmPassword = "No coincide";
     setErrors(nextErrors);
     return Object.keys(nextErrors).length === 0;
@@ -45,7 +45,7 @@ const Profile = () => {
     try {
       await changePassword({ currentPassword: form.currentPassword, newPassword: form.newPassword });
       setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      pushToast({ type: "success", title: "Actualizado", message: "Contrasena modificada" });
+      pushToast({ type: "success", title: "Actualizado", message: "Contraseña modificada" });
     } catch (error) {
       pushToast({ type: "error", title: "Error", message: error.message });
     } finally {
@@ -78,7 +78,7 @@ const Profile = () => {
                 <p>{patient?.email || profile?.email || "-"}</p>
               </div>
               <div>
-                <span className="label">Telefono</span>
+                <span className="label">Teléfono</span>
                 <p>{profile?.phone || "-"}</p>
               </div>
               <div>
@@ -94,21 +94,21 @@ const Profile = () => {
         </div>
 
         <div className="card" id="password">
-          <div className="card-header">Cambiar contrasena</div>
+          <div className="card-header">Cambiar contraseña</div>
           <div className="card-body">
             <form onSubmit={handleSubmit} className="form-stack">
               <label className="field">
-                <span className="label">Contrasena actual</span>
+                <span className="label">Contraseña actual</span>
                 <input type="password" name="currentPassword" value={form.currentPassword} onChange={onChange} />
                 {errors.currentPassword ? <span className="error-text">{errors.currentPassword}</span> : null}
               </label>
               <label className="field">
-                <span className="label">Nueva contrasena</span>
+                <span className="label">Nueva contraseña</span>
                 <input type="password" name="newPassword" value={form.newPassword} onChange={onChange} />
                 {errors.newPassword ? <span className="error-text">{errors.newPassword}</span> : null}
               </label>
               <label className="field">
-                <span className="label">Confirmar contrasena</span>
+                <span className="label">Confirmar contraseña</span>
                 <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={onChange} />
                 {errors.confirmPassword ? <span className="error-text">{errors.confirmPassword}</span> : null}
               </label>

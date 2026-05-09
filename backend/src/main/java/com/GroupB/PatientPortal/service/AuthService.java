@@ -11,4 +11,6 @@ public interface AuthService {
     PatientProfileResponse getProfile(String email);
 
     void changePassword(String email, ChangePasswordRequest request);
+
+    void requestPasswordReset(String email);
 }

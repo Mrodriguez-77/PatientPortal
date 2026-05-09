@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api, normalizeList, normalizeDoctor, normalizeAppointment } from "../services/api.js";
 import { useAuth } from "../services/auth.jsx";
 import { useToast } from "../components/ui/ToastProvider.jsx";
@@ -19,12 +19,13 @@ const Appointments = () => {
   const { token } = useAuth();
   const { pushToast } = useToast();
   const [tab, setTab] = useState("doctors");
-  const [search, setSearch] = useState("");
+  const [specialtySearch, setSpecialtySearch] = useState("");
   const [doctors, setDoctors] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loadingDoctors, setLoadingDoctors] = useState(true);
   const [loadingAppointments, setLoadingAppointments] = useState(true);
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [cancelTarget, setCancelTarget] = useState(null);
   const [dateTime, setDateTime] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(0);
@@ -33,7 +34,7 @@ const Appointments = () => {
   const fetchDoctors = async () => {
     setLoadingDoctors(true);
     try {
-      const response = await api.get(`/api/doctors/available?specialty=${search}&page=0&size=10`, token);
+      const response = await api.get(`/api/doctors/available?specialty=${specialtySearch}&page=0&size=10`, token);
       setDoctors((normalizeList(response).list || []).map(normalizeDoctor));
     } catch (error) {
       pushToast({ type: "error", title: "Error", message: error.message });
@@ -60,18 +61,11 @@ const Appointments = () => {
   useEffect(() => {
     const timer = setTimeout(fetchDoctors, 400);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [specialtySearch]);
 
   useEffect(() => {
     fetchAppointments(page, statusFilter);
   }, [page, statusFilter]);
-
-  const filteredDoctors = useMemo(() => {
-    if (!search) return doctors;
-    return doctors.filter((doctor) =>
-      (doctor.fullName || "").toLowerCase().includes(search.toLowerCase())
-    );
-  }, [doctors, search]);
 
   const scheduleAppointment = async () => {
     if (!selectedDoctor) return;
@@ -100,9 +94,9 @@ const Appointments = () => {
     <div>
       <div className="page-header">
         <h2>Citas</h2>
-        <div className="tabs">
+        <div className="tabs" style={{ marginBottom: 12 }}>
           <button type="button" className={`tab-btn ${tab === "doctors" ? "active" : ""}`} onClick={() => setTab("doctors")}>
-            Medicos disponibles
+            Médicos disponibles
           </button>
           <button type="button" className={`tab-btn ${tab === "history" ? "active" : ""}`} onClick={() => setTab("history")}>
             Historial de citas
@@ -114,9 +108,9 @@ const Appointments = () => {
         <div>
           <div style={{ marginBottom: 16 }}>
             <input
-              placeholder="Buscar especialidad o medico"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Buscar por especialidad"
+              value={specialtySearch}
+              onChange={(event) => setSpecialtySearch(event.target.value)}
             />
           </div>
           <div className="grid grid-3">
@@ -128,8 +122,8 @@ const Appointments = () => {
                   <Skeleton height={10} width={80} />
                 </div>
               ))
-            ) : filteredDoctors.length ? (
-              filteredDoctors.map((doctor) => (
+            ) : doctors.length ? (
+              doctors.map((doctor) => (
                 <div key={doctor.id} className="card" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div>
                     <h4>{doctor.fullName}</h4>
@@ -143,7 +137,7 @@ const Appointments = () => {
               ))
             ) : (
               <div className="empty-state">
-                <strong>No hay medicos disponibles</strong>
+                <strong>No hay médicos disponibles</strong>
                 <span className="text-muted">Prueba con otra especialidad</span>
               </div>
             )}
@@ -195,7 +189,7 @@ const Appointments = () => {
                           </td>
                           <td>
                             {(["SCHEDULED", "CONFIRMED"].includes(appointment.status)) ? (
-                              <button type="button" className="btn btn-danger" onClick={() => cancelAppointment(appointment)}>
+                              <button type="button" className="btn btn-danger" onClick={() => setCancelTarget(appointment)}>
                                 Cancelar
                               </button>
                             ) : (
@@ -209,7 +203,7 @@ const Appointments = () => {
                 </div>
               ) : (
                 <div className="empty-state">
-                  <strong>No tienes citas aun</strong>
+                  <strong>No tienes citas aún</strong>
                   <button type="button" className="btn btn-primary" onClick={() => setTab("doctors")}>
                     Agendar primera cita
                   </button>
@@ -244,7 +238,7 @@ const Appointments = () => {
           }
         >
           <div className="field">
-            <span className="label">Medico</span>
+            <span className="label">Médico</span>
             <p>{selectedDoctor.fullName}</p>
           </div>
           <div className="field">
@@ -255,6 +249,39 @@ const Appointments = () => {
             <span className="label">Fecha y hora</span>
             <input type="datetime-local" value={dateTime} onChange={(event) => setDateTime(event.target.value)} />
           </label>
+        </Modal>
+      ) : null}
+
+      {cancelTarget ? (
+        <Modal
+          title="Cancelar cita"
+          onClose={() => setCancelTarget(null)}
+          actions={
+            <>
+              <button type="button" className="btn btn-secondary" onClick={() => setCancelTarget(null)}>
+                No, mantener cita
+              </button>
+              <button
+                type="button"
+                className="btn btn-danger"
+                onClick={() => {
+                  cancelAppointment(cancelTarget);
+                  setCancelTarget(null);
+                }}
+              >
+                Sí, cancelar cita
+              </button>
+            </>
+          }
+        >
+          <p>
+            ¿Estás seguro de que deseas cancelar tu cita con
+            <strong> {cancelTarget.doctorName}</strong> el
+            <strong> {formatDateTime(cancelTarget.dateTime)}</strong>?
+          </p>
+          <p className="text-muted" style={{ marginTop: 8 }}>
+            Esta acción no se puede deshacer.
+          </p>
         </Modal>
       ) : null}
     </div>

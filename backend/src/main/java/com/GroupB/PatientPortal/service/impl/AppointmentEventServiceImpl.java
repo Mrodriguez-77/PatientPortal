@@ -10,6 +10,7 @@ import com.GroupB.PatientPortal.service.WebSocketNotificationService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.AmqpRejectAndDontRequeueException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -76,6 +77,7 @@ public class AppointmentEventServiceImpl implements AppointmentEventService {
         } catch (Exception e) {
             log.error("Error procesando cita confirmada: {}", e.getMessage());
             markFailed(auditEvent, e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
     }
 
@@ -109,6 +111,7 @@ public class AppointmentEventServiceImpl implements AppointmentEventService {
         } catch (Exception e) {
             log.error("Error procesando cancelación: {}", e.getMessage());
             markFailed(auditEvent, e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
     }
 
@@ -147,6 +150,7 @@ public class AppointmentEventServiceImpl implements AppointmentEventService {
         } catch (Exception e) {
             log.error("Error procesando cambio de estado: {}", e.getMessage());
             markFailed(auditEvent, e.getMessage());
+            throw new AmqpRejectAndDontRequeueException(e.getMessage(), e);
         }
     }
 
@@ -218,6 +222,7 @@ public class AppointmentEventServiceImpl implements AppointmentEventService {
                 .hoursBeforeAppointment(hoursBefore)
                 .scheduledSendTime(event.getDateTime().minusHours(hoursBefore))
                 .doctorName(event.getDoctorName())
+                .specialty(event.getSpecialty())
                 .build();
 
         appointmentReminderRepository.save(reminder);

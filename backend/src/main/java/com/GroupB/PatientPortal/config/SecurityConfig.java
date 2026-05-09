@@ -42,7 +42,16 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/pages/**",
-                                "/*.html"
+                                "/api/test/**",
+                                "/*.html",
+                                "/dashboard",
+                                "/dashboard/**",
+                                "/appointments",
+                                "/appointments/**",
+                                "/notifications",
+                                "/notifications/**",
+                                "/profile",
+                                "/profile/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

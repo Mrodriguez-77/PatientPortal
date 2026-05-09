@@ -7,8 +7,8 @@ import { formatRelative } from "../utils/formatters.js";
 
 const filters = [
   { label: "Todas", value: "" },
-  { label: "No leidas", value: "false" },
-  { label: "Leidas", value: "true" },
+  { label: "No leídas", value: "false" },
+  { label: "Leídas", value: "true" },
 ];
 
 const Notifications = () => {
@@ -50,8 +50,9 @@ const Notifications = () => {
 
   const markAll = async () => {
     try {
-      await Promise.all(items.filter((item) => !item.read).map((item) => api.put(`/api/patient/notifications/${item.id}/read`, {}, token)));
+      await api.put("/api/patient/notifications/read-all", {}, token);
       fetchNotifications();
+      pushToast({ type: "success", title: "Listo", message: "Todas las notificaciones marcadas como leídas" });
     } catch (error) {
       pushToast({ type: "error", title: "Error", message: error.message });
     }
@@ -64,8 +65,13 @@ const Notifications = () => {
           <h2>Notificaciones</h2>
           <p className="text-secondary">Seguimiento de tus comunicaciones</p>
         </div>
-        <button type="button" className="btn btn-secondary" onClick={markAll}>
-          Marcar todas como leidas
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={markAll}
+          style={{ marginBottom: 12 }}
+        >
+          Marcar todas como leídas
         </button>
       </div>
 
@@ -99,7 +105,7 @@ const Notifications = () => {
               </div>
               {!item.read ? (
                 <button type="button" className="btn btn-secondary" onClick={() => markAsRead(item)}>
-                  Marcar leida
+                  Marcar leída
                 </button>
               ) : null}
             </div>
@@ -107,7 +113,7 @@ const Notifications = () => {
         ) : (
           <div className="empty-state">
             <strong>No hay notificaciones</strong>
-            <span className="text-muted">Tus avisos apareceran aqui</span>
+            <span className="text-muted">Tus avisos aparecerán aquí</span>
           </div>
         )}
       </div>

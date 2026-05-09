@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Component
@@ -19,6 +20,7 @@ public class ReminderScheduler {
     private final WebSocketNotificationService webSocketService;
 
     @Scheduled(fixedRate = 300000) // cada 5 minutos
+    @Transactional
     public void sendScheduledReminders() {
         log.info("ReminderScheduler: buscando recordatorios pendientes...");
 
@@ -37,11 +39,11 @@ public class ReminderScheduler {
 
         for (var reminder : reminders) {
             try {
-                emailService.sendReminderEmail(reminder);
-
                 reminder.setSent(true);
                 reminder.setEmailSentAt(LocalDateTime.now());
                 reminderRepository.save(reminder);
+
+                emailService.sendReminderEmail(reminder);
 
                 webSocketService.notifyReminder(
                         reminder.getPatient().getId(),

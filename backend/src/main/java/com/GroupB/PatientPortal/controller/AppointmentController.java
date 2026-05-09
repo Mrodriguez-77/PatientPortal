@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,11 +28,13 @@ public class AppointmentController {
     @GetMapping("/api/doctors/available")
     @Operation(summary = "Ver médicos disponibles (proxy a Grupo A)")
     public ResponseEntity<ApiResponse<Object>> getDoctors(
+            HttpServletRequest request,
             @RequestParam(required = false) String specialty,
-            Pageable pageable) {
+            @PageableDefault(size = 10) Pageable pageable) {
+        String token = request.getHeader("Authorization");
         return ResponseEntity.ok(
                 ApiResponse.success("Médicos obtenidos",
-                        appointmentProxyService.getDoctors(specialty, pageable)));
+                        appointmentProxyService.getDoctors(specialty, pageable, token)));
     }
 
     @GetMapping("/api/patient/appointments")
@@ -39,12 +42,13 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<Object>> getMyAppointments(
             HttpServletRequest request,
             @RequestParam(required = false) String status,
-            Pageable pageable) {
+            @PageableDefault(size = 10) Pageable pageable) {
         Long patientId = extractPatientId(request);
+        String token = request.getHeader("Authorization");
         return ResponseEntity.ok(
                 ApiResponse.success("Citas obtenidas",
                         appointmentProxyService.getPatientAppointments(
-                                patientId, status, pageable)));
+                                patientId, status, pageable, token)));
     }
 
     @PostMapping("/api/patient/appointments")
@@ -54,10 +58,11 @@ public class AppointmentController {
             @RequestParam Long doctorId,
             @RequestParam LocalDateTime dateTime) {
         Long patientId = extractPatientId(request);
+        String token = request.getHeader("Authorization");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Cita creada exitosamente",
                         appointmentProxyService.createAppointment(
-                                patientId, doctorId, dateTime)));
+                                patientId, doctorId, dateTime, token)));
     }
 
     @DeleteMapping("/api/patient/appointments/{id}")
@@ -66,9 +71,10 @@ public class AppointmentController {
             HttpServletRequest request,
             @PathVariable Long id) {
         Long patientId = extractPatientId(request);
+        String token = request.getHeader("Authorization");
         return ResponseEntity.ok(
                 ApiResponse.success("Cita cancelada exitosamente",
-                        appointmentProxyService.cancelAppointment(patientId, id)));
+                        appointmentProxyService.cancelAppointment(patientId, id, token)));
     }
 
     private Long extractPatientId(HttpServletRequest request) {

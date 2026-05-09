@@ -59,4 +59,13 @@ public class NotificationController {
         return ResponseEntity.ok(
                 ApiResponse.success("Notificación marcada como leída", null));
     }
+
+    @PutMapping("/read-all")
+    public ResponseEntity<ApiResponse<Void>> markAllAsRead(Principal principal) {
+        Long patientId = patientRepository.findByEmail(principal.getName())
+                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"))
+                .getId();
+        notificationRepository.markAllAsReadByPatientId(patientId);
+        return ResponseEntity.ok(ApiResponse.success("Todas marcadas como leídas", null));
+    }
 }

@@ -28,6 +28,9 @@ public class AppointmentReminder {
     @Column(name = "doctor_name")
     private String doctorName;
 
+    @Column(name = "specialty")
+    private String specialty;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "reminder_type", nullable = false)
     private ReminderType reminderType;

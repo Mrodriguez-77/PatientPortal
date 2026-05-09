@@ -58,10 +58,10 @@ const TopNav = () => {
               <span>{patient?.email || ""}</span>
             </div>
             <button type="button" onClick={() => navigate("/profile")}>Mi perfil</button>
-            <button type="button" onClick={() => navigate("/profile#password")}>Cambiar contrasena</button>
+            <button type="button" onClick={() => navigate("/profile#password")}>Cambiar contraseña</button>
             <div className="dropdown-divider" />
             <button type="button" className="danger" onClick={() => { logout(); navigate("/login"); }}>
-              Cerrar sesion
+              Cerrar sesión
             </button>
           </div>
         ) : null}
